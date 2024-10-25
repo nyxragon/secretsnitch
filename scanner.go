@@ -226,7 +226,7 @@ func scanFile(filePath string, wg *sync.WaitGroup) {
 	secrets := FindSecrets(string(data))
 	secrets.CacheFile = filePath
 
-	if len(secrets.Secrets) > 0 {
+	if (*secretsOptional && len(secrets.Secrets) == 0) || len(secrets.Secrets) > 0 {
 		unindented, _ := json.Marshal(secrets)
 		appendToFile(*outputFile, string(unindented))
 		indented, _ := json.MarshalIndent(secrets, "", "	")
