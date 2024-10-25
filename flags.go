@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/spf13/pflag"
 )
@@ -18,28 +19,33 @@ var (
 	url     *string
 	urlList *string
 
-	//github module
+	// github module
 	github      *bool
 	from        *string
 	to          *string
 	githubGists *bool
 
-	//gitlab module
+	// gitlab module
 	gitlab *bool
 
-	//phishtank module
+	// phishtank module
 	phishtank *bool
 
-	//recursively crawl URLs on page.
+	// recursively crawl URLs on page.
 	recurse *bool
 
 	// output file name
 	outputFile *string
+
+	// maximum number of permitted workers
+	maxWorkers *int
 )
 
 func customUsage() {
-	fmt.Println("\nSecretsnitch\nhttps://github.com/0x4f53/secretsnitch\n")
-	fmt.Println("A lightning-fast secret scanner in Golang!\n")
+	fmt.Println("\nSecretsnitch\nhttps://github.com/0x4f53/secretsnitch")
+	fmt.Println("")
+	fmt.Println("A lightning-fast secret scanner in Golang!")
+	fmt.Println("")
 	fmt.Fprintf(os.Stderr, "Usage:\n%s [input options] [output options]\n", os.Args[0])
 	fmt.Println("")
 	fmt.Println("Input (pick at least one):")
@@ -58,13 +64,15 @@ func customUsage() {
 	fmt.Println("  --urlList=<file containing URLs>     A line-separated file containing a list of URLs to scan for secrets")
 	fmt.Println("")
 	fmt.Println("  --directory=<directory/with/files/>  Scan an entire directory")
-	fmt.Println("  --file=<file.js>  					Scan a file")
+	fmt.Println("  --file=<file.js>                     Scan a file")
 	fmt.Println("")
 	fmt.Println("Optional arguments:")
 	fmt.Println("")
+	fmt.Println("  --max-workers                        Maximum number of workers to use (default: " + strconv.Itoa(*maxWorkers) + ")")
+	fmt.Println("")
 	fmt.Println("  --output                             Save scan output to a custom location")
 	fmt.Println("")
-	fmt.Println("  --recurse                   Crawl URLs and hyperlinks inside page to 1 level")
+	fmt.Println("  --recurse                            Crawl URLs and hyperlinks inside page to 1 level")
 	fmt.Println("")
 }
 
@@ -83,13 +91,20 @@ func setFlags() {
 	gitlab = pflag.Bool("gitlab", false, "")
 
 	phishtank = pflag.Bool("phishtank", false, "")
-	recurse = pflag.Bool("recurse", false, "")
 
+	maxWorkers = pflag.Int("workers", 1000, "")
+
+	recurse = pflag.Bool("recurse", false, "")
 	outputFile = pflag.String("output", defaultOutputDir, "")
 
 	pflag.Usage = customUsage
-
 	pflag.Parse()
+
+	if *maxWorkers < 2 {
+		//pflag.Usage()
+		fmt.Println("Please use at least 2 workers for efficient concurrency.")
+		os.Exit(-1)
+	}
 
 	if !*github && !*gitlab && !*phishtank && *url == "" && *urlList == "" && *directory == "" && *file == "" && !*githubGists {
 		pflag.Usage()

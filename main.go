@@ -7,8 +7,6 @@ import (
 	gitlabPatches "github.com/0x4f53/gitlab-patches"
 )
 
-var maxWorkers = 100000 // number of concurrent workers
-
 var signatures []Signature
 
 func main() {

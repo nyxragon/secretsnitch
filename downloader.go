@@ -54,7 +54,7 @@ func fetchFromUrlList(urls []string) []string {
 
 	urlChan := make(chan string)
 
-	for i := 0; i < maxWorkers; i++ {
+	for i := 0; i < *maxWorkers; i++ {
 		go func() {
 			for url := range urlChan {
 				if fileExists(makeCacheFilename(url)) {

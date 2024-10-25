@@ -134,10 +134,9 @@ func FindSecrets(text string) ToolData {
 	var mu sync.Mutex
 	var wg sync.WaitGroup
 
-	workerCount := 10000
-	lineChan := make(chan string, workerCount)
+	lineChan := make(chan string, *maxWorkers)
 
-	for i := 0; i < workerCount; i++ {
+	for i := 0; i < *maxWorkers; i++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
@@ -250,7 +249,7 @@ func ScanFiles(files []string) {
 	var wg sync.WaitGroup
 	fileChan := make(chan string)
 
-	for i := 0; i < maxWorkers; i++ {
+	for i := 0; i < *maxWorkers; i++ {
 		go func() {
 			for file := range fileChan {
 				scanFile(file, &wg)
