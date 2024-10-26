@@ -36,8 +36,9 @@
 
 - Twilio:
   - SendGrid API Key: (?i)(SG\.[\w\-_]{20,24}\.[\w\-_]{39,50})
-  - Token: (?i)(?:twilio)[^{}()<>?*&:%@!\/= \n]{0,20}( ){0,1}[=:]( ){0,1}?(?:^|['\"`])((?:AC|ac)[a-f0-9]{32})(?:$|['\"`])
-  - API Key: (?i)(sk[0-9a-fA-F]{32})
+  - Account SID: AC[a-zA-Z0-9_\-]{32}
+  - App SID: AP[a-zA-Z0-9_\-]{32}
+  - API Key: SK[0-9a-fA-F]{32}
 
 - Atlassian: 
   - JIRA Token: (?i)(?:jira)[^{}()<>?*&:%@!\/= \n]{0,20}[\"\'`]?\s{0,50}\b(?::|=>|=|,)\s{0,50}[\"\'`]?([a-zA-Z-0-9]{24})
@@ -69,6 +70,8 @@
   - Device Code: GH_[a-zA-Z0-9_]{9,30}
   - Refresh Token: (?i)ghr_[A-Za-z0-9_]{35,38}
   - Webhook Secret: (?i)(whsec_[A-Za-z0-9]{31,38})
+  - Authentication URL: >
+      [a-zA-Z0-9_-]*:[a-zA-Z0-9_\-]+@github\.com*
 
 - GitLab:
   - Personal Access Token: (?i)glpat-[A-Za-z0-9\-_]{20}
@@ -125,6 +128,8 @@
 - SquareUp:
   - API Key: sq0i[a-z]{2}-[0-9A-Za-z\-_]{22,43}
   - API Secret: sq0c[a-z]{2}-[0-9A-Za-z\-_]{40,50}
+  - OAuth Token: sq0csp-[ 0-9A-Za-z\-_]{43}|sq0[a-z]{3}-[0-9A-Za-z\-_]{22,43}
+  - Access Token: sqOatp-[0-9A-Za-z\-_]{22}|EAAA[a-zA-Z0-9]{60}
 
 - PubNub:
   - Publish Key: pub-c-[0-9a-z]{8}-[0-9a-z]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}
