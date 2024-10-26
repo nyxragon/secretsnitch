@@ -8,105 +8,126 @@ Stress tested with 100k URLs from GitHub
 package main
 
 import (
+	"io"
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"sync"
 	"time"
 
-	"github.com/gocolly/colly"
 	"golang.org/x/exp/rand"
 )
 
 var (
-	timeoutSeconds  = 30
-	maxRetries      = 5
-	userAgentString = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
+	timeoutSeconds = 30
+	maxRetries     = 5
+	userAgentList  = []string{
+		"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36",
+		"Mozilla/5.0 (Windows NT 10.0; Win64; x64; Trident/7.0; AS; rv:11.0) like Gecko",
+		"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:92.0) Gecko/20100101 Firefox/92.0",
+	}
 )
 
-func scrapeURL(url string, wg *sync.WaitGroup) {
-	defer wg.Done()
-
-	// Create the collector once at the beginning of the function
-	c := colly.NewCollector()
-	c.OnRequest(func(r *colly.Request) {
-		r.Headers.Set("User-Agent", userAgentString)
-	})
-	c.SetRequestTimeout(time.Duration(timeoutSeconds) * time.Second)
-
-	var dataReceived bool
-	// Handle response
-	c.OnResponse(func(r *colly.Response) {
-		if r.StatusCode != http.StatusOK {
-			log.Printf("Received non-OK response: %s (status: %d)\n", url, r.StatusCode)
-			return
-		}
-		dataReceived = true
-		responseString := url + "\n---\n" + string(r.Body)
-
-		err := os.WriteFile(makeCacheFilename(url), []byte(responseString), 0644)
-		if err != nil {
-			log.Printf("Failed to write response body to file: %s\n", err)
-		} else {
-			log.Printf("Content from %s saved to %s\n", url, makeCacheFilename(url))
-		}
-	})
-
+func scrapeURL(url string) {
 	var retryCount int
-	for {
-		err := c.Visit(url)
-		log.Printf("Visiting %s", url)
 
-		if err != nil {
-			log.Printf("Failed to visit URL %s: %s\n", url, err)
+	for {
+		client := &http.Client{
+			Timeout: time.Duration(timeoutSeconds) * time.Second,
 		}
 
-		if dataReceived {
-			break // Exit if data has been successfully received
+		req, err := http.NewRequest("GET", url, nil)
+		if err != nil {
+			log.Printf("Failed to create request for URL %s: %s\n", url, err)
+			break
+		}
+
+		req.Header.Set("User-Agent", userAgentList[rand.Intn(len(userAgentList))])
+		req.Header.Set("Accept-Language", "en-US,en;q=0.5")
+		req.Header.Set("Connection", "keep-alive")
+
+		resp, err := client.Do(req)
+
+		responseCode := strconv.Itoa(resp.StatusCode)
+
+		if resp.StatusCode == 404 {
+			log.Printf("%s Failed to read response body from %s: %s\n", responseCode, url, err)
+			break
+		}
+
+		if err != nil {
+			log.Printf("%s Failed to send request to URL %s: %s\n", responseCode, url, err)
+		} else {
+			defer resp.Body.Close() // Ensure the response body is closed after reading
+			if resp.StatusCode == http.StatusOK {
+				body, err := io.ReadAll(resp.Body)
+				if err != nil {
+					log.Printf("%s Failed to read response body from %s: %s\n", responseCode, url, err)
+				} else {
+					responseString := url + "\n---\n" + string(body)
+
+					err = os.WriteFile(makeCacheFilename(url), []byte(responseString), 0644)
+					if err != nil {
+						log.Printf("Failed to write response body to file: %s\n", err)
+					} else {
+						log.Printf("%s Content from %s saved to %s\n", responseCode, url, cacheDir)
+					}
+				}
+				break
+			} else {
+				log.Printf("%s Received non-OK HTTP status from %s: %s\n", responseCode, url, resp.Status)
+			}
 		}
 
 		retryCount++
+
 		if retryCount >= maxRetries {
 			log.Printf("Maximum retries reached for URL %s\n", url)
 			break
 		}
 
 		waitTime := time.Duration(1+rand.Intn(timeoutSeconds)) * time.Second
-		log.Printf("No data received from %s, retrying in %v... (%d/%d)\n", url, waitTime, retryCount, maxRetries)
+		log.Printf("%s No data received from %s, retrying in %v... (%d/%d)\n", responseCode, url, waitTime, retryCount, maxRetries)
 		time.Sleep(waitTime)
 	}
 }
 
 func fetchFromUrlList(urls []string) []string {
-
 	var wg sync.WaitGroup
-
 	urlChan := make(chan string)
+	var processedUrls []string
+
+	var successfulDownloads []string
+
+	for _, url := range urls {
+		if !fileExists(makeCacheFilename(url)) {
+			processedUrls = append(processedUrls, url)
+		} else {
+			log.Printf("Skipping %s as it is already cached", url)
+			successfulDownloads = append(successfulDownloads, makeCacheFilename(url))
+		}
+	}
 
 	for i := 0; i < *maxWorkers; i++ {
 		go func() {
 			for url := range urlChan {
-				if fileExists(makeCacheFilename(url)) {
-					log.Printf("Skipping %s as it is already cached", url)
-					continue
-				}
 				wg.Add(1)
-				scrapeURL(url, &wg)
+				defer wg.Done()
+				scrapeURL(url)
 			}
 		}()
 	}
 
-	for _, url := range urls {
+	for _, url := range processedUrls {
 		urlChan <- url
 	}
 
 	close(urlChan)
 	wg.Wait()
 
-	var successfulDownloads []string
-
 	cachedFiles, _ := listCachedFiles()
-	for _, url := range urls {
+	for _, url := range processedUrls {
 		cachedFileName := makeCacheFilename(url)
 		if sliceContainsString(cachedFiles, cachedFileName) {
 			successfulDownloads = append(successfulDownloads, cachedFileName)
@@ -114,5 +135,4 @@ func fetchFromUrlList(urls []string) []string {
 	}
 
 	return successfulDownloads
-
 }

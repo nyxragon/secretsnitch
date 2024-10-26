@@ -49,7 +49,15 @@ func baseURL(inputURL string) (string, error) {
 		return "", err
 	}
 
-	// Construct base URL with scheme and host
 	baseURL := fmt.Sprintf("%s://%s", parsedURL.Scheme, parsedURL.Host)
 	return baseURL, nil
+}
+
+func removeFromSlice(s []string, r string) []string {
+	for i, v := range s {
+		if v == r {
+			return append(s[:i], s[i+1:]...)
+		}
+	}
+	return s
 }

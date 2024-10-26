@@ -195,7 +195,7 @@ func FindSecrets(text string) ToolData {
 	return output
 }
 
-func saveSecrets(secrets ToolData, outputFile *string) {
+func logSecrets(secrets ToolData, outputFile *string) {
 	unindented, _ := json.Marshal(secrets)
 	appendToFile(*outputFile, string(unindented))
 	indented, _ := json.MarshalIndent(secrets, "", "	")
@@ -239,7 +239,7 @@ func scanFile(filePath string, wg *sync.WaitGroup) {
 	secrets.CacheFile = filePath
 
 	if (*secretsOptional && len(secrets.Secrets) == 0) || len(secrets.Secrets) > 0 {
-		saveSecrets(secrets, outputFile)
+		logSecrets(secrets, outputFile)
 	}
 
 	if *maxRecursions > 0 {
