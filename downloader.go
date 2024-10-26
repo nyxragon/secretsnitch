@@ -20,7 +20,6 @@ import (
 
 var (
 	timeoutSeconds = 30
-	maxRetries     = 5
 	userAgentList  = []string{
 		"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36",
 		"Mozilla/5.0 (Windows NT 10.0; Win64; x64; Trident/7.0; AS; rv:11.0) like Gecko",
@@ -74,7 +73,7 @@ func scrapeURL(url string) {
 
 		retryCount++
 
-		if retryCount >= maxRetries {
+		if retryCount >= *maxRetries {
 			log.Printf("Maximum retries reached for URL %s\n", url)
 			break
 		}

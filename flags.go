@@ -40,6 +40,9 @@ var (
 	// maximum number of page recursions
 	maxRecursions *int
 
+	// maximum number of page recursions
+	maxRetries *int
+
 	// Show data even if no secrets are caught
 	secretsOptional *bool
 )
@@ -71,11 +74,13 @@ func customUsage() {
 	fmt.Println("")
 	fmt.Println("Optional arguments:")
 	fmt.Println("")
-	fmt.Println("  --workers             Maximum number of workers to use (default: " + strconv.Itoa(*maxWorkers) + ")")
-	fmt.Println("")
 	fmt.Println("  --output                  Save scan output to a custom location")
 	fmt.Println("")
+	fmt.Println("  --workers                 Maximum number of workers to use (default: " + strconv.Itoa(*maxWorkers) + ")")
+	fmt.Println("")
 	fmt.Println("  --recursions=<number>     Crawl URLs and hyperlinks inside targets (default: " + strconv.Itoa(*maxRecursions) + ")")
+	fmt.Println("")
+	fmt.Println("  --retries=<number>        Maximum retries before giving up (default: " + strconv.Itoa(*maxRetries) + ")")
 	fmt.Println("")
 	fmt.Println("  --secrets-optional        Display other data (such as endpoints, domains etc.) even if there are no secrets")
 	fmt.Println("")
@@ -99,6 +104,7 @@ func setFlags() {
 
 	maxWorkers = pflag.Int("workers", 1000, "")
 	maxRecursions = pflag.Int("recursions", 0, "")
+	maxRetries = pflag.Int("retries", 3, "")
 	secretsOptional = pflag.Bool("secrets-optional", false, "")
 	outputFile = pflag.String("output", defaultOutputDir, "")
 
