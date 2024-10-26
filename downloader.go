@@ -12,7 +12,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strconv"
 	"sync"
 	"time"
 
@@ -49,21 +48,14 @@ func scrapeURL(url string) {
 
 		resp, err := client.Do(req)
 
-		responseCode := strconv.Itoa(resp.StatusCode)
-
-		if resp.StatusCode == 404 {
-			log.Printf("%s Failed to read response body from %s: %s\n", responseCode, url, err)
-			break
-		}
-
 		if err != nil {
-			log.Printf("%s Failed to send request to URL %s: %s\n", responseCode, url, err)
+			log.Printf("%s ERR Failed to send request to URL %s: %s\n", url, err)
 		} else {
 			defer resp.Body.Close() // Ensure the response body is closed after reading
 			if resp.StatusCode == http.StatusOK {
 				body, err := io.ReadAll(resp.Body)
 				if err != nil {
-					log.Printf("%s Failed to read response body from %s: %s\n", responseCode, url, err)
+					log.Printf("Failed to read response body from %s: %s\n", url, err)
 				} else {
 					responseString := url + "\n---\n" + string(body)
 
@@ -71,12 +63,12 @@ func scrapeURL(url string) {
 					if err != nil {
 						log.Printf("Failed to write response body to file: %s\n", err)
 					} else {
-						log.Printf("%s Content from %s saved to %s\n", responseCode, url, cacheDir)
+						log.Printf("Content from %s saved to %s\n", url, cacheDir)
 					}
 				}
 				break
 			} else {
-				log.Printf("%s Received non-OK HTTP status from %s: %s\n", responseCode, url, resp.Status)
+				log.Printf("Received non-OK HTTP status from %s: %s\n", url, resp.Status)
 			}
 		}
 
@@ -88,7 +80,7 @@ func scrapeURL(url string) {
 		}
 
 		waitTime := time.Duration(1+rand.Intn(timeoutSeconds)) * time.Second
-		log.Printf("%s No data received from %s, retrying in %v... (%d/%d)\n", responseCode, url, waitTime, retryCount, maxRetries)
+		log.Printf("No data received from %s, retrying in %v... (%d/%d)\n", url, waitTime, retryCount, maxRetries)
 		time.Sleep(waitTime)
 	}
 }

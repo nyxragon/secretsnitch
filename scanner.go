@@ -193,6 +193,7 @@ func FindSecrets(text string) ToolData {
 	}
 
 	return output
+
 }
 
 func logSecrets(secrets ToolData, outputFile *string) {
