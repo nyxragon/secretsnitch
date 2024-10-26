@@ -71,7 +71,7 @@ func customUsage() {
 	fmt.Println("")
 	fmt.Println("Optional arguments:")
 	fmt.Println("")
-	fmt.Println("  --max-workers             Maximum number of workers to use (default: " + strconv.Itoa(*maxWorkers) + ")")
+	fmt.Println("  --workers             Maximum number of workers to use (default: " + strconv.Itoa(*maxWorkers) + ")")
 	fmt.Println("")
 	fmt.Println("  --output                  Save scan output to a custom location")
 	fmt.Println("")
