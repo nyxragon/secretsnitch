@@ -1,8 +1,7 @@
 ---
 - Amazon:
   - Access Key: (?:A3T[A-Z0-9]|AKIA|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA|ABIA|ACCA)[A-Z0-9]{16}
-  # - Secret Access Key: (?i)secret(_access_key|accesskey)[^,.{}()<>?*&:%@!\/= \n]{0,20}\s*[:=]\s*[\w0-9-+=\/\""'][^\s\n.:{}()<>?*&:%@!]{38,42}
-  - Secret Access Key: ^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])[a-zA-Z0-9]{40,42}$
+  - Secret Access Key: (?i)secret(_access_key|accesskey)[^,.{}()<>?*&:%@!\/= \n]{0,20}\s*[:=]\s*[\w0-9-+=\/\""'][^\s\n.:{}()<>?*&:%@!]{38,42}
   - Cognito User Pool ID: (?i)us-[a-z]{2,}-[a-z]{4,}-\d{1,}
   - RDS Password: (?i)(rds\-master\-password|db\-password)[^\"'`\n]{0,40}[\"'`\n]{0,3}[a-zA-Z0-9@#*+=]{8,}
   - S3 Private Key: (?i)(AWS_S3_PRIVATE_KEY|s3_key)[^\"'`\n]{0,40}[\"'`\n]{0,3}[a-zA-Z0-9/+=]{40}
@@ -49,7 +48,7 @@
 - Google:
   - Cloud API Key: AIza[0-9A-Za-z_-]{35}
   - Cloud OAuth Secret: (?i)(GOCSPX-[-0-9A-Za-z_]{24,32})
-  # - reCaptcha Key: 6L([A-Za-z0-9_-]{38,40})
+  - reCaptcha Key: 6L([A-Za-z0-9_-]{5})UAAAAA([A-Za-z0-9_-]{27})
   - OAuth Key: ya29\.[0-9A-Za-z_-]{64,256}
   - Firebase URL: (?i)https:\/\/[a-z0-9-]+\.firebaseio\.com\/.*.json
   - Firebase Cloud Messaging API Key: (?i)([0-9a-zA-Z_-]{11}:APA91b[0-9a-zA-Z_-]{134})
