@@ -35,43 +35,16 @@ type ToolData struct {
 	CapturedURLs    []string
 }
 
-func getMatchingLines(input string, pattern string) (map[string]string, error) {
-
-	// This is not the regular golang library. It supports lookaheads and stuff.
-	re := regexp2.MustCompile(pattern, 0)
-
-	matches := make(map[string]string)
-
-	scanner := bufio.NewScanner(strings.NewReader(input))
-	for scanner.Scan() {
-		line := scanner.Text()
-		values, _ := extractKeyValuePairs(line)
-		for key, value := range values {
-			match, _ := re.MatchString(value)
-			if match && !containsBlacklisted(value) {
-				matches[key] = value
-			}
-		}
-	}
-
-	if err := scanner.Err(); err != nil && len(matches) == 0 {
-		values, _ := extractKeyValuePairs(input)
-		for key, value := range values {
-			match, _ := re.MatchString(value)
-			if match {
-				matches[key] = value
-			}
-		}
-	}
-
-	return matches, nil
-
-}
-
 func grabURLs(text string) []string {
 
 	var captured []string
 	location := substringBeforeFirst(text, "---")
+
+	baseUrl, _ := baseURL(location)
+
+	if !strings.HasSuffix(baseUrl, "/") {
+		baseUrl += "/"
+	}
 
 	text = strings.Replace(text, location, "", -1)
 
@@ -90,27 +63,28 @@ func grabURLs(text string) []string {
 		re := regexp.MustCompile(`(?:href|src|action|cite|data|formaction|poster)\s*=\s*["']([^"']+)["']`)
 		matches := re.FindAllStringSubmatch(line, -1)
 
-		for _, match := range matches {
-			fixedUrl := match[1]
-			if strings.HasPrefix(fixedUrl, "//") {
-				fixedUrl = protocol + ":" + fixedUrl
+		for _, matchGroups := range matches {
+
+			resource := matchGroups[1]
+
+			if !strings.Contains(resource, "://") && !strings.HasPrefix(resource, "//") {
+				resource = baseUrl + resource
+			} else if !strings.Contains(resource, "://") && strings.HasPrefix(resource, "//") {
+				resource = protocol + ":" + resource
 			}
-			validDomains, _ := textsubs.DomainsOnly(fixedUrl, false)
-			if len(validDomains) > 0 && !strings.Contains(fixedUrl, "://") {
-				fixedUrl = protocol + ":" + fixedUrl
-			}
-			captured = append(captured, fixedUrl)
+
+			captured = append(captured, resource)
 		}
 
 	}
 
 	if err := scanner.Err(); err != nil {
-		fmt.Printf("error reading string: %s\n", err)
+		log.Printf("error reading string: %s\n", err)
 	}
 
 	var urls []string
 	for _, url := range captured {
-		if strings.Contains(url, "://") {
+		if strings.Contains(url, "://") && strings.Contains(url, ".") {
 			urls = append(urls, url)
 		}
 	}
@@ -119,6 +93,15 @@ func grabURLs(text string) []string {
 
 }
 
+// The brains of secretsnitch. Runs a bunch of checks including regexes, provider matching, entropy etc. Refer to docs for more
+//
+// Input:
+//
+// text (string) - text to search secrets in
+//
+// Output:
+//
+// ToolData - proprietary data type containing scan results
 func FindSecrets(text string) ToolData {
 
 	var output ToolData
@@ -212,6 +195,34 @@ func FindSecrets(text string) ToolData {
 	return output
 }
 
+func saveSecrets(secrets ToolData, outputFile *string) {
+	unindented, _ := json.Marshal(secrets)
+	appendToFile(*outputFile, string(unindented))
+	indented, _ := json.MarshalIndent(secrets, "", "	")
+	fmt.Println(string(indented))
+}
+
+func ScanFiles(files []string) {
+	var wg sync.WaitGroup
+	fileChan := make(chan string)
+
+	for i := 0; i < *maxWorkers; i++ {
+		go func() {
+			for file := range fileChan {
+				wg.Add(1)
+				scanFile(file, &wg)
+			}
+		}()
+	}
+
+	for _, file := range files {
+		fileChan <- file
+	}
+
+	close(fileChan)
+	wg.Wait()
+}
+
 var recursionCount = 0
 
 func scanFile(filePath string, wg *sync.WaitGroup) {
@@ -223,45 +234,21 @@ func scanFile(filePath string, wg *sync.WaitGroup) {
 		return
 	}
 
-	secrets := FindSecrets(string(data))
+	text := string(data)
+	secrets := FindSecrets(text)
 	secrets.CacheFile = filePath
 
 	if (*secretsOptional && len(secrets.Secrets) == 0) || len(secrets.Secrets) > 0 {
-		unindented, _ := json.Marshal(secrets)
-		appendToFile(*outputFile, string(unindented))
-		indented, _ := json.MarshalIndent(secrets, "", "	")
-		fmt.Println(string(indented))
+		saveSecrets(secrets, outputFile)
 	}
 
-	if *recurse {
+	if *maxRecursions > 0 {
 		recursionCount++
 		urls := grabURLs(string(data))
-		fetchFromUrlList(urls)
-		files, _ := listCachedFiles()
-		if recursionCount < 1 {
-			ScanFiles(files)
+		successfulUrls := fetchFromUrlList(urls)
+
+		if recursionCount < *maxRecursions {
+			ScanFiles(successfulUrls)
 		}
 	}
-
-}
-
-func ScanFiles(files []string) {
-	var wg sync.WaitGroup
-	fileChan := make(chan string)
-
-	for i := 0; i < *maxWorkers; i++ {
-		go func() {
-			for file := range fileChan {
-				scanFile(file, &wg)
-			}
-		}()
-	}
-
-	for _, file := range files {
-		wg.Add(1)
-		fileChan <- file
-	}
-
-	close(fileChan)
-	wg.Wait()
 }

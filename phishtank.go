@@ -5,6 +5,7 @@ import (
 	"encoding/csv"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 )
@@ -21,10 +22,10 @@ func savePhishtankDataset() error {
 
 	switch resp.StatusCode {
 	case 404:
-		fmt.Println("Phishtank is down. Please try again later.")
+		log.Println("Phishtank is down. Please try again later.")
 		os.Exit(-1)
 	case 429:
-		fmt.Println("Phishtank has rate-limited you. Please try again.")
+		log.Println("Phishtank has rate-limited you. Please try again.")
 		os.Exit(-1)
 	}
 

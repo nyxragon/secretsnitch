@@ -16,7 +16,7 @@ var (
 	file *string
 
 	// url module
-	url     *string
+	URL     *string
 	urlList *string
 
 	// github module
@@ -31,14 +31,14 @@ var (
 	// phishtank module
 	phishtank *bool
 
-	// recursively crawl URLs on page.
-	recurse *bool
-
 	// output file name
 	outputFile *string
 
 	// maximum number of permitted workers
 	maxWorkers *int
+
+	// maximum number of page recursions
+	maxRecursions *int
 
 	// Show data even if no secrets are caught
 	secretsOptional *bool
@@ -75,7 +75,7 @@ func customUsage() {
 	fmt.Println("")
 	fmt.Println("  --output                  Save scan output to a custom location")
 	fmt.Println("")
-	fmt.Println("  --recurse                 Crawl URLs and hyperlinks inside page to 1 level")
+	fmt.Println("  --recursions=<number>     Crawl URLs and hyperlinks inside targets (default: " + strconv.Itoa(*maxRecursions) + ")")
 	fmt.Println("")
 	fmt.Println("  --secrets-optional        Display other data (such as endpoints, domains etc.) even if there are no secrets")
 	fmt.Println("")
@@ -88,7 +88,7 @@ func setFlags() {
 
 	githubGists = pflag.Bool("github-gists", false, "")
 
-	url = pflag.String("url", "", "")
+	URL = pflag.String("url", "", "")
 	urlList = pflag.String("urlList", "", "")
 	directory = pflag.String("directory", "", "")
 	file = pflag.String("file", "", "")
@@ -98,7 +98,7 @@ func setFlags() {
 	phishtank = pflag.Bool("phishtank", false, "")
 
 	maxWorkers = pflag.Int("workers", 1000, "")
-	recurse = pflag.Bool("recurse", false, "")
+	maxRecursions = pflag.Int("recursions", 0, "")
 	secretsOptional = pflag.Bool("secrets-optional", false, "")
 	outputFile = pflag.String("output", defaultOutputDir, "")
 
@@ -111,7 +111,7 @@ func setFlags() {
 		os.Exit(-1)
 	}
 
-	if !*github && !*gitlab && !*phishtank && *url == "" && *urlList == "" && *directory == "" && *file == "" && !*githubGists {
+	if !*github && !*gitlab && !*phishtank && *URL == "" && *urlList == "" && *directory == "" && *file == "" && !*githubGists {
 		pflag.Usage()
 		fmt.Println("Come on, you'll have to pick some option!")
 		os.Exit(-1)

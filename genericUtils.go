@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/md5"
 	"fmt"
+	"net/url"
 	"strings"
 )
 
@@ -40,4 +41,15 @@ func sliceContainsString(slice []string, item string) bool {
 		}
 	}
 	return false
+}
+
+func baseURL(inputURL string) (string, error) {
+	parsedURL, err := url.Parse(inputURL)
+	if err != nil {
+		return "", err
+	}
+
+	// Construct base URL with scheme and host
+	baseURL := fmt.Sprintf("%s://%s", parsedURL.Scheme, parsedURL.Host)
+	return baseURL, nil
 }

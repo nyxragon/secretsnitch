@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"os"
 
 	githubPatches "github.com/0x4f53/github-patches"
@@ -10,6 +11,11 @@ import (
 var signatures []Signature
 
 func main() {
+
+	err := makeDir(cacheDir)
+	if err != nil {
+		log.Println(err)
+	}
 
 	setFlags()
 
@@ -22,8 +28,8 @@ func main() {
 		return
 	}
 
-	if *url != "" {
-		successfulUrls := fetchFromUrlList([]string{*url})
+	if *URL != "" {
+		successfulUrls := fetchFromUrlList([]string{*URL})
 		ScanFiles(successfulUrls)
 		return
 	}
