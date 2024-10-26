@@ -61,3 +61,17 @@ func removeFromSlice(s []string, r string) []string {
 	}
 	return s
 }
+
+func grabSourceUrl(text string) string {
+	lines := strings.Split(text, "\n")
+
+	if len(lines) < 2 {
+		return ""
+	}
+
+	if strings.TrimSpace(lines[1]) == "---" {
+		return lines[0]
+	}
+
+	return ""
+}

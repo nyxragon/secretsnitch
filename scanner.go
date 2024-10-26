@@ -132,7 +132,7 @@ func FindSecrets(text string) ToolData {
 							re := regexp2.MustCompile(regex, 0)
 							match, _ := re.MatchString(value)
 
-							if match {
+							if match && !(containsBlacklisted(key) || containsBlacklisted(value)) {
 								mu.Lock()
 								tags = append(tags, "regexMatched")
 								mu.Unlock()
@@ -180,7 +180,7 @@ func FindSecrets(text string) ToolData {
 
 	wg.Wait()
 
-	sourceUrl := substringBeforeFirst(text, "---")
+	sourceUrl := grabSourceUrl(text)
 	capturedUrls := grabURLs(text)
 
 	output = ToolData{
@@ -235,6 +235,14 @@ func scanFile(filePath string, wg *sync.WaitGroup) {
 	}
 
 	text := string(data)
+
+	sourceUrl := grabSourceUrl(string(data))
+	if sourceUrl != "" {
+		log.Println("Searching for secrets in: " + sourceUrl)
+	} else {
+		log.Println("Searching for secrets in: " + filePath)
+	}
+
 	secrets := FindSecrets(text)
 	secrets.CacheFile = filePath
 

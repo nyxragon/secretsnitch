@@ -9,7 +9,7 @@ import (
 func containsBlacklisted(text string) bool {
 
 	var blacklist = []string{
-		"data:image/png;",
+		"image/png",
 	}
 
 	for _, item := range blacklist {

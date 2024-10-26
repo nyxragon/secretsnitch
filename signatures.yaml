@@ -99,7 +99,7 @@
   - Swarm Unlock Token: (?i)(swmkey-1-[A-Za-z0-9+_-]{30,50})
 
 - Meta:
-  - Page Access Token: (?i)(EAAG[0-9A-Za-z]{10,255})
+  - Page Access Token: (?i)(EAAG[0-9A-Za-z]{10,128})
   - Facebook Access Token: EAACEdEose0cBA[0-9A-Za-z]+
   #- Client Token: (?i)fb[a-zA-Z0-9]{24,32}
   - Instagram Access Token: (?i)(IGQV[0-9A-Za-z-_]{10,255})
