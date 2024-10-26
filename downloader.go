@@ -49,7 +49,7 @@ func scrapeURL(url string) {
 		resp, err := client.Do(req)
 
 		if err != nil {
-			log.Printf("%s ERR Failed to send request to URL %s: %s\n", url, err)
+			log.Printf("ERR Failed to send request to URL %s: %s\n", url, err)
 		} else {
 			defer resp.Body.Close() // Ensure the response body is closed after reading
 			if resp.StatusCode == http.StatusOK {
