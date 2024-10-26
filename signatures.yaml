@@ -95,6 +95,12 @@
 # - StackUp
 #   - API Key: STACK_UP_AUTH
 
+- Oracle:
+  - Cloud Infrastructure: ocid1\.(tenancy|user)\.oc1\..[a-zA-Z0-9\-_]{59}
+
+- Tencent:
+  - Cloud API: AKID[0-9a-zA-Z]{16}
+
 - Docker:
   - Hub Access Token: dckr_pat_[a-zA-Z0-9_=-]{24,32}
   - Swarm Join Token: (?i)(SWMTKN-[a-z0-9A-Z]+)
