@@ -31,26 +31,31 @@ tool can be run in singular commands as shown in the examples below.
 
 The signatures list is completely community-driven and is a combination of trial-and-error, Google searching, ChatGPT and from existing lists like that of GitGuardian. Pull requests for signature additions and corrections are welcome, and feel free to use these signatures in other cybersecurity tools you build.
 
+### Troubleshooting
+
+#### Selenium mode
+
+If you receive a message like the one below on Linux
+
 ```
-Usage:
-./secretsnitch [input options] [output options]
-
-Input options:
-
-  --github           Scan public GitHub commits from the past hour
-    --from           (optional) Timestamp to start from (format: 2006-01-02-15)
-    --to             (optional) Timestamp to stop at (format: 2006-01-02-15)
-
-  --gitlab           Scan the last 100 public GitLab commits
-
-  --phishtank        Scan reported phishtank.org URLs from the past day
-
-  --url              Single URL to scan
-  --urlList          A file containing a list of URLs to scan for secrets
-
-  --directory        Scan an entire directory
-
-Output options:
-
-  --output           Save scan output to file
+Error creating container: Post "http://unix.sock/containers/create?": dial unix /var/run/docker.sock: connect: permission denied
 ```
+
+Simply run
+
+```
+sudo usermod -aG docker $USER
+newgrp docker
+```
+
+And try again. 
+
+For Windows, try the following
+
+1. Open Docker Desktop Settings
+2. Right-click the Docker icon in the system tray and select Settings.
+3. Enable the TCP Endpoint
+4. Go to the General or Resources > Advanced settings (the exact menu depends on the Docker Desktop version).
+5. Look for an option to Expose daemon on tcp://localhost:2375 without TLS.
+6. Enable this option if you’re okay with using an insecure endpoint, or set up certificates for localhost:2376 if you prefer TLS.
+7. Go to the `dockerSelenium.go` file and replace `unix:///var/run/docker.sock` with `http://localhost:2375`.

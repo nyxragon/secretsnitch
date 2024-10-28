@@ -29,7 +29,12 @@ func main() {
 	}
 
 	if *URL != "" {
-		successfulUrls := fetchFromUrlList([]string{*URL})
+		var successfulUrls []string
+		if *selenium {
+			successfulUrls = []string{scrapeWithSelenium(*URL)}
+		} else {
+			successfulUrls = fetchFromUrlList([]string{*URL})
+		}
 		ScanFiles(successfulUrls)
 		return
 	}
