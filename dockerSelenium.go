@@ -1,10 +1,14 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"runtime"
+	"strings"
 
 	docker "github.com/fsouza/go-dockerclient"
 )
@@ -26,7 +30,7 @@ func scrapeWithSelenium(url string) string {
 
 	containerOptions := docker.CreateContainerOptions{
 		Config: &docker.Config{
-			Image: "selenium-fetcher",
+			Image: "selenium-integration",
 			Cmd:   []string{url},
 		},
 		HostConfig: &docker.HostConfig{
@@ -62,4 +66,41 @@ func scrapeWithSelenium(url string) string {
 
 	return ""
 
+}
+
+func checkDockerInstalled() bool {
+	var cmd *exec.Cmd
+
+	if runtime.GOOS == "windows" {
+		cmd = exec.Command("cmd", "/C", "docker", "--version")
+	} else {
+		cmd = exec.Command("sh", "-c", "docker --version")
+	}
+
+	if err := cmd.Run(); err != nil {
+		return false
+	}
+	return true
+}
+
+func checkImageBuilt() bool {
+	imageName := "selenium-integration"
+	cmd := exec.Command("docker", "images", "--format", "{{.Repository}}:{{.Tag}}")
+
+	var out bytes.Buffer
+	cmd.Stdout = &out
+
+	if err := cmd.Run(); err != nil {
+		fmt.Println("Error executing command:", err)
+		return false
+	}
+
+	// Parse the output to check if the image exists
+	imageList := strings.Split(out.String(), "\n")
+	for _, image := range imageList {
+		if strings.HasPrefix(image, imageName+":") {
+			return true
+		}
+	}
+	return false
 }

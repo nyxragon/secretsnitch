@@ -46,13 +46,31 @@ func grabURLs(text string) []string {
 		baseUrl += "/"
 	}
 
+	// remove metadata URL
 	text = strings.Replace(text, location, "", -1)
 
 	scanner := bufio.NewScanner(strings.NewReader(text))
 
 	rx := xurls.Relaxed()
 	rxUrls := rx.FindAllString(text, -1)
+
 	captured = append(captured, rxUrls...)
+
+	// split JS files for single quotes
+	for _, url := range rxUrls {
+		if strings.Count(url, "'") > 3 {
+			splitUrls := strings.Split(url, "'")
+			captured = append(captured, splitUrls...)
+		}
+	}
+
+	// split JS files for double quotes
+	for _, url := range rxUrls {
+		if strings.Count(url, "\"") > 3 {
+			splitUrls := strings.Split(url, "\"")
+			captured = append(captured, splitUrls...)
+		}
+	}
 
 	splitText := strings.Split(text, "{")
 
@@ -84,7 +102,8 @@ func grabURLs(text string) []string {
 
 	var urls []string
 	for _, url := range captured {
-		if strings.Contains(url, "://") && strings.Contains(url, ".") {
+
+		if strings.Contains(url, "://") && strings.Contains(url, ".") && !strings.Contains(url, "'") {
 			urls = append(urls, url)
 		}
 	}
