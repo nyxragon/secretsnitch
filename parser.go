@@ -2,15 +2,28 @@ package main
 
 import (
 	"bufio"
+	"log"
+	"os"
 	"regexp"
 	"strings"
+
+	"gopkg.in/yaml.v3"
+)
+
+var (
+	blacklistFile = "blacklist.yaml"
 )
 
 func containsBlacklisted(text string) bool {
 
-	var blacklist = []string{
-		"image/png",
+	data, err := os.ReadFile(blacklistFile)
+	if err != nil {
+		log.Fatalf("Error: %v", err)
 	}
+
+	// Parse the YAML content into a slice of strings
+	var blacklist []string
+	err = yaml.Unmarshal(data, &blacklist)
 
 	for _, item := range blacklist {
 		if strings.Contains(text, item) {
@@ -22,76 +35,30 @@ func containsBlacklisted(text string) bool {
 
 }
 
-func extractKeyValuePairs(text string) (map[string]string, error) {
+type VariableData struct {
+	Name     string
+	Operator string
+	Value    string
+}
+
+func extractKeyValuePairs(text string) ([]VariableData, error) {
 
 	// Initialize a map to hold the key-value pairs
-	keyValuePairs := make(map[string]string)
-
-	// Regular expressions for matching various formats
-	var reJSON = regexp.MustCompile(`"([^"]+)" *:\s*"([^"]+)"`)
-	var reJS = regexp.MustCompile(`(\w+):"([^"]+)"`)
-	var reEnv = regexp.MustCompile(`^\s*([A-Z_][A-Z0-9_]*?)\s*=\s*(.*)\s*$`)
-	var reDict = regexp.MustCompile(`'([^']+)' *:\s*'([^']+)'`)
-	var reGo = regexp.MustCompile(`\b(\w+)\s*:=\s*"([^"]+)"`)
-	var reXML = regexp.MustCompile(`<([^\/>]+)[\/]*>.*</([^\/>]+)[\/]*>`)
-	var reOtherLang = regexp.MustCompile(`\b(\w+)\s*=\s*"([^"]+)"`)
+	var assignmentPairs []VariableData
 
 	// Scan the file line by line
 	scanner := bufio.NewScanner(strings.NewReader(text))
 	for scanner.Scan() {
 		line := scanner.Text()
 
-		// Match JSON style key-value pairs
-		if matches := reJSON.FindAllStringSubmatch(line, -1); matches != nil {
-			for _, match := range matches {
-				keyValuePairs[match[1]] = match[2]
-			}
-		}
+		jsonAndDicts := parseJsonAndDict(line)
+		assignmentPairs = append(assignmentPairs, jsonAndDicts...)
 
-		// Match JS style key-value pairs
-		if matches := reJS.FindAllStringSubmatch(line, -1); matches != nil {
-			for _, match := range matches {
-				keyValuePairs[match[1]] = match[2]
-			}
-		}
+		xmlTags := parseXmlTags(line)
+		assignmentPairs = append(assignmentPairs, xmlTags)
 
-		// Match .env file style key-value pairs
-		if matches := reEnv.FindAllStringSubmatch(line, -1); matches != nil {
-			for _, match := range matches {
-				keyValuePairs[match[1]] = match[2]
-			}
-		}
-
-		// Match Dict style key-value pairs
-		if matches := reDict.FindAllStringSubmatch(line, -1); matches != nil {
-			for _, match := range matches {
-				keyValuePairs[match[1]] = match[2]
-			}
-		}
-
-		// Match Go language key-value pairs
-		if matches := reGo.FindAllStringSubmatch(line, -1); matches != nil {
-			for _, match := range matches {
-				keyValuePairs[match[1]] = match[2]
-			}
-		}
-
-		// Match XML key-value pairs
-		if matches := reXML.FindAllStringSubmatch(line, -1); matches != nil {
-			for _, match := range matches {
-				value := strings.Replace(match[0], match[1], "", -1)
-				value = strings.Replace(value, "<>", "", -1)
-				value = strings.Replace(value, "</>", "", -1)
-				keyValuePairs[match[1]] = value
-			}
-		}
-
-		// Match other programming languages key-value pairs
-		if matches := reOtherLang.FindAllStringSubmatch(line, -1); matches != nil {
-			for _, match := range matches {
-				keyValuePairs[match[1]] = match[2]
-			}
-		}
+		colonsAndEquals := parseColonsAndEquals(line)
+		assignmentPairs = append(assignmentPairs, colonsAndEquals)
 	}
 
 	// Check for errors during scanning
@@ -99,5 +66,119 @@ func extractKeyValuePairs(text string) (map[string]string, error) {
 		return nil, err
 	}
 
-	return keyValuePairs, nil
+	assignmentPairs = removeEmptyAndDuplicateData(assignmentPairs)
+
+	return assignmentPairs, nil
+}
+
+// Match static colon/equals key-value pairs
+func parseColonsAndEquals(line string) VariableData {
+	var parsedData VariableData
+	var reStaticColon = regexp.MustCompile(`(\w+\)\]) {0,1}(:=|=|:) {0,1}(\S+)`)
+
+	if matches := reStaticColon.FindStringSubmatch(line); matches != nil {
+
+		value := matches[3]
+		value = strings.Trim(value, "\"")
+		value = strings.Trim(value, "'")
+		value = strings.Trim(value, "`")
+
+		parsedData = VariableData{
+			Name:     matches[1],
+			Operator: matches[2],
+			Value:    value,
+		}
+	}
+	return parsedData
+}
+
+// Match XML tags
+func parseXmlTags(line string) VariableData {
+	var parsedData VariableData
+	var reXML = regexp.MustCompile(`<([^\/>]+)[\/]*>.*<(/[^\/>]+)[\/]*>`)
+	if matches := reXML.FindStringSubmatch(line); matches != nil {
+		value := strings.Replace(matches[0], matches[1], "", -1)
+		value = strings.Replace(value, "<>", "", -1)
+		value = strings.Replace(value, "</>", "", -1)
+
+		value = strings.Trim(value, "\"")
+		value = strings.Trim(value, "'")
+		value = strings.Trim(value, "`")
+
+		parsedData = VariableData{
+			Name:     matches[1],
+			Operator: "<>...</>",
+			Value:    value,
+		}
+	}
+	return parsedData
+}
+
+// Match static JSON and Dict key-value pairs
+func parseJsonAndDict(text string) []VariableData {
+	pattern := `["']?([^"':\s]+)["']?\s*:\s*["']?([^"'\n]+)["']?`
+	re := regexp.MustCompile(pattern)
+	matches := re.FindAllStringSubmatch(text, -1)
+	var keyValuePairs []VariableData
+	for _, match := range matches {
+		if len(match) == 3 {
+			parsedData := VariableData{
+				Name:     match[1],
+				Operator: ":",
+				Value:    match[2],
+			}
+			if parsedData.Value != "" {
+
+				parsedData.Value = strings.Trim(parsedData.Value, "\"")
+				parsedData.Value = strings.Trim(parsedData.Value, "'")
+				parsedData.Value = strings.Trim(parsedData.Value, "`")
+
+				keyValuePairs = append(keyValuePairs, parsedData)
+			}
+		}
+	}
+
+	return keyValuePairs
+}
+
+// Match static JSON and Dict key-value pairs
+func parsePrivateKeys(text string) []VariableData {
+	pattern := `(-----BEGIN (?:[DR]SA|EC|PGP|OPENSSH)?\s?PRIVATE KEY(?: BLOCK)?-----)[A-Za-z0-9+\/=\s]{128,}(-----END (?:[DR]SA|EC|PGP|OPENSSH)?\s?PRIVATE KEY(?: BLOCK)?-----)`
+	re := regexp.MustCompile(pattern)
+	matches := re.FindAllStringSubmatch(text, -1)
+
+	var keyValuePairs []VariableData
+	for _, match := range matches {
+		if len(match) == 3 {
+			parsedData := VariableData{
+				Name:     match[1],
+				Operator: "-----",
+				Value:    match[0],
+			}
+			if parsedData.Value != "" {
+				keyValuePairs = append(keyValuePairs, parsedData)
+			}
+		}
+	}
+	return keyValuePairs
+}
+
+func removeEmptyAndDuplicateData(input []VariableData) []VariableData {
+	var parsedData []VariableData
+	exists := func(item VariableData) bool {
+		for _, existingItem := range parsedData {
+			if existingItem.Value == item.Value && existingItem.Name == item.Name {
+				return true
+			}
+		}
+		return false
+	}
+
+	for _, item := range input {
+		if len(item.Value) > 3 && !exists(item) {
+			parsedData = append(parsedData, item)
+		}
+	}
+
+	return parsedData
 }

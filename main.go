@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"os/exec"
 
 	githubPatches "github.com/0x4f53/github-patches"
 	gitlabPatches "github.com/0x4f53/gitlab-patches"
@@ -31,6 +32,13 @@ func main() {
 	if *URL != "" {
 		var successfulUrls []string
 		if *selenium {
+			if !checkDockerInstalled() {
+				log.Fatalf("Please install Docker to use Selenium mode!")
+			}
+			if !checkImageBuilt() {
+				log.Fatalf("Attempting to build Selenium testing image from Dockerfile...")
+				exec.Command("docker", "build", "-t", "selenium-integration", ".clear")
+			}
 			successfulUrls = []string{scrapeWithSelenium(*URL)}
 		} else {
 			successfulUrls = fetchFromUrlList([]string{*URL})

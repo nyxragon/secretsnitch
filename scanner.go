@@ -17,12 +17,12 @@ import (
 )
 
 type Secret struct {
-	Provider    string
-	ServiceName string
-	Variable    string
-	Secret      string
-	Entropy     float64
-	Tags        []string
+	Provider       string
+	ServiceName    string
+	Variable       string
+	Secret         string
+	TsallisEntropy float64
+	Tags           []string
 }
 
 type ToolData struct {
@@ -102,7 +102,6 @@ func grabURLs(text string) []string {
 
 	var urls []string
 	for _, url := range captured {
-
 		if strings.Contains(url, "://") && strings.Contains(url, ".") && !strings.Contains(url, "'") {
 			urls = append(urls, url)
 		}
@@ -126,12 +125,38 @@ func FindSecrets(text string) ToolData {
 	var output ToolData
 	var secrets []Secret
 
-	var tags []string
-
+	// Metadata collection
 	domains, _ := textsubs.DomainsOnly(text, false)
 	domains = textsubs.Resolve(domains)
 
+	sourceUrl := grabSourceUrl(text)
+	capturedUrls := grabURLs(text)
+
+	// Secret collection
+
+	// 1. Secret file detection
+	privateKeys := parsePrivateKeys(text)
+	if len(privateKeys) > 0 {
+		for _, variable := range privateKeys {
+			serviceName := "Secure Shell"
+			if strings.Contains(strings.ToLower(variable.Name), "pgp") {
+				serviceName = "PGP"
+			}
+			secret := Secret{
+				Provider:       serviceName,
+				ServiceName:    "Private Key",
+				Variable:       variable.Name,
+				Secret:         variable.Value,
+				TsallisEntropy: 1.0,
+				Tags:           []string{"longString", "providerDetected", "regexMatched"},
+			}
+			secrets = append(secrets, secret)
+		}
+	}
+
+	// 2. Variable detection
 	splitText := strings.Split(text, "{")
+	splitText = append(splitText, strings.Split(text, "\n")...)
 
 	var mu sync.Mutex
 	var wg sync.WaitGroup
@@ -145,43 +170,57 @@ func FindSecrets(text string) ToolData {
 			for line := range lineChan {
 				data, _ := extractKeyValuePairs(line)
 
-				for key, value := range data {
+				for _, variable := range data {
+
+					if containsBlacklisted(variable.Value) {
+						continue
+					}
+
 					for _, provider := range signatures {
 						for service, regex := range provider.Keys {
 							re := regexp2.MustCompile(regex, 0)
-							match, _ := re.MatchString(value)
+							variableNameMatch, _ := re.MatchString(variable.Name)
+							variableValueMatch, _ := re.MatchString(variable.Value)
 
-							if match && !(containsBlacklisted(key) || containsBlacklisted(value)) {
+							match := variableValueMatch
+
+							if strings.Contains(strings.ToLower(service), "variable") {
+								match = variableNameMatch
+							}
+
+							if match {
 								mu.Lock()
-								tags = append(tags, "regexMatched")
-								mu.Unlock()
 
-								entropy := EntropyPercentage(value)
-								if entropy > 66.6 {
-									mu.Lock()
-									tags = append(tags, "highEntropy")
-									mu.Unlock()
-								}
+								var tags []string
+
+								tags = append(tags, "regexMatched")
+
+								entropy := tsallisEntropy(variable.Value, 2)
 
 								providerString := strings.ToLower(strings.Split(provider.Name, ".")[0])
-
-								if strings.Contains(strings.ToLower(text), providerString) {
-									mu.Lock()
+								if strings.Contains(strings.ToLower(text), providerString) && !strings.EqualFold(provider.Name, "Generic") {
 									tags = append(tags, "providerDetected")
-									mu.Unlock()
 								}
 
-								secret := Secret{
-									Provider:    provider.Name,
-									ServiceName: service,
-									Variable:    key,
-									Secret:      value,
-									Entropy:     entropy,
-									Tags:        removeDuplicates(tags),
+								if len(variable.Value) > 16 {
+									tags = append(tags, "longString")
 								}
 
-								mu.Lock()
-								secrets = append(secrets, secret)
+								if len(variable.Value) > 8 {
+									secret := Secret{
+										Provider:       provider.Name,
+										ServiceName:    service,
+										Variable:       variable.Name,
+										Secret:         variable.Value,
+										TsallisEntropy: entropy,
+										Tags:           removeDuplicates(tags),
+									}
+
+									if !containsSecret(secrets, secret) {
+										secrets = append(secrets, secret)
+									}
+								}
+
 								mu.Unlock()
 							}
 						}
@@ -198,9 +237,6 @@ func FindSecrets(text string) ToolData {
 	close(lineChan)
 
 	wg.Wait()
-
-	sourceUrl := grabSourceUrl(text)
-	capturedUrls := grabURLs(text)
 
 	output = ToolData{
 		Tool:            "secretsnitch",
