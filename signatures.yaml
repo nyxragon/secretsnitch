@@ -35,10 +35,10 @@
   - Private Access Token: (?i)shppa_[a-fA-F0-9]{32}
 
 - Twilio:
-  - SendGrid API Key: (?i)(SG\.[\w\-_]{20,24}\.[\w\-_]{39,50})\b
-  - Account SID: AC[a-zA-Z0-9_\-]{32}\b
-  - App SID: AP[a-zA-Z0-9_\-]{32}\b
-  - API Key: SK[0-9a-fA-F]{32}\b
+  - SendGrid API Key: (?i)(SG\.[\w\-_]{20,24}\.[\w\-_]{39,50})
+  - Account SID: AC[a-zA-Z0-9_\-]{32}
+  - App SID: AP[a-zA-Z0-9_\-]{32}
+  - API Key: SK[0-9a-fA-F]{32}
 
 - Atlassian: 
   - JIRA Token: (?i)(?:jira)[^{}()<>?*&:%@!\/= \n]{0,20}[\"\'`]?\s{0,50}\b(?::|=>|=|,)\s{0,50}[\"\'`]?([a-zA-Z-0-9]{24})
@@ -105,6 +105,9 @@
   - Hub Access Token: dckr_pat_[a-zA-Z0-9_=-]{24,32}
   - Swarm Join Token: (?i)(SWMTKN-[a-z0-9A-Z]+)
   - Swarm Unlock Token: (?i)(swmkey-1-[A-Za-z0-9+_-]{30,50})
+
+- Replit:
+  - Identity Secret Key: k2.secret.[\w]+
 
 - Meta:
   - Page Access Token: (?i)(EAAG[0-9A-Za-z]{10,128})
@@ -248,8 +251,8 @@
 - Fastly:
   - Personal Token:	(?i)(?:fastly)[^{}()<>?*&%'",@!\-/=\n]{0,40}\b([A-Za-z0-9_-]{32})\b
 
-- Intercom:
-  - Access Token:	(?i)(?:intercom).{5,40}[:= ]\b([a-zA-Z0-9+\\=]{32,64})
+#- Intercom:
+#  - Access Token:	(?i)(?:intercom).{5,40}[:= ]\b([a-zA-Z0-9+\\=]{32,64})
 
 - Asana:
   - Personal Access Token: (?i)(?:asana).{0,40}([0-9]{1,}\/[0-9]{10,}:[A-Za-z0-9]{32,})|([0-9]{1,}\/[0-9]{10,}:[A-Za-z0-9]{32,})

@@ -155,7 +155,9 @@ func FindSecrets(text string) ToolData {
 	}
 
 	// 2. Variable detection
+	text = strings.ReplaceAll(text, `\"`, `"`)
 	splitText := strings.Split(text, "{")
+	splitText = append(splitText, strings.Split(text, ";")...)
 	splitText = append(splitText, strings.Split(text, "\n")...)
 
 	var mu sync.Mutex
