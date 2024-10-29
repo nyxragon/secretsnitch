@@ -21,9 +21,11 @@ func containsBlacklisted(text string) bool {
 		log.Fatalf("Error: %v", err)
 	}
 
-	// Parse the YAML content into a slice of strings
 	var blacklist []string
 	err = yaml.Unmarshal(data, &blacklist)
+	if err != nil {
+		log.Fatalf("Error: %v", err)
+	}
 
 	for _, item := range blacklist {
 		if strings.Contains(text, item) {
@@ -74,7 +76,7 @@ func extractKeyValuePairs(text string) ([]VariableData, error) {
 // Match static colon/equals key-value pairs
 func parseColonsAndEquals(line string) VariableData {
 	var parsedData VariableData
-	var reStaticColon = regexp.MustCompile(`(\w+\)\]) {0,1}(:=|=|:) {0,1}(\S+)`)
+	var reStaticColon = regexp.MustCompile(`(\w+\){0,1}\]{0,1}) {0,1}(:=|=|:) {0,1}(\S+)`)
 
 	if matches := reStaticColon.FindStringSubmatch(line); matches != nil {
 

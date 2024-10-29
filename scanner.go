@@ -188,6 +188,8 @@ func FindSecrets(text string) ToolData {
 								match = variableNameMatch
 							}
 
+							fmt.Println(variable.Name)
+
 							if match {
 								mu.Lock()
 
