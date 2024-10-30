@@ -1,7 +1,4 @@
-- data:image/
-- data:audio/
-- sha512-
-- sha256-
-- sha1-
-- your_password_here
-- your_api_key
+- (?i)data:.+/
+- (?i)image/[a-z]{1,4}
+- (?i)sha[0-9]{0,3}-
+- (?i)your[_-].+[-_]here

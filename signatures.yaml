@@ -36,7 +36,7 @@
 
 - Twilio:
   - SendGrid API Key: (?i)(SG\.[\w\-_]{20,24}\.[\w\-_]{39,50})
-  - Account SID: AC[a-zA-Z0-9_\-]{32}
+  - Account SID: \bAC[a-zA-Z0-9_\-]{32}
   - App SID: AP[a-zA-Z0-9_\-]{32}
   - API Key: SK[0-9a-fA-F]{32}
 

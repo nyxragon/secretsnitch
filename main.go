@@ -37,7 +37,7 @@ func main() {
 			}
 			if !checkImageBuilt() {
 				log.Fatalf("Attempting to build Selenium testing image from Dockerfile...")
-				exec.Command("docker", "build", "-t", "selenium-integration", ".clear")
+				exec.Command("docker", "build", "-t", "selenium-integration", ".")
 			}
 			successfulUrls = []string{scrapeWithSelenium(*URL)}
 		} else {

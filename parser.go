@@ -28,7 +28,8 @@ func containsBlacklisted(text string) bool {
 	}
 
 	for _, item := range blacklist {
-		if strings.Contains(text, item) {
+		re := regexp.MustCompile(item)
+		if len(re.FindAllString(text, 1)) > 0 {
 			return true
 		}
 	}

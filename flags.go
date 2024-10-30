@@ -107,7 +107,7 @@ func setFlags() {
 
 	phishtank = pflag.Bool("phishtank", false, "")
 
-	maxWorkers = pflag.Int("workers", 1000, "")
+	maxWorkers = pflag.Int("workers", 5000, "")
 	maxRecursions = pflag.Int("recursions", 0, "")
 	maxRetries = pflag.Int("retries", 3, "")
 	secretsOptional = pflag.Bool("secrets-optional", false, "")

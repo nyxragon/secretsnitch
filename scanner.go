@@ -7,12 +7,12 @@ import (
 	"log"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/0x4f53/textsubs"
-	"github.com/dlclark/regexp2"
 	"mvdan.cc/xurls/v2"
 )
 
@@ -72,7 +72,11 @@ func grabURLs(text string) []string {
 		}
 	}
 
-	splitText := strings.Split(text, "{")
+	var splitText []string
+	splitText = append(splitText, strings.Split(text, "{")...)
+	splitText = append(splitText, strings.Split(text, ",")...)
+	splitText = append(splitText, strings.Split(text, "\n")...)
+	splitText = removeDuplicates(splitText)
 
 	protocol := substringBeforeFirst(location, "://")
 
@@ -125,13 +129,6 @@ func FindSecrets(text string) ToolData {
 	var output ToolData
 	var secrets []Secret
 
-	// Metadata collection
-	domains, _ := textsubs.DomainsOnly(text, false)
-	domains = textsubs.Resolve(domains)
-
-	sourceUrl := grabSourceUrl(text)
-	capturedUrls := grabURLs(text)
-
 	// Secret collection
 
 	// 1. Secret file detection
@@ -157,8 +154,11 @@ func FindSecrets(text string) ToolData {
 	// 2. Variable detection
 	text = strings.ReplaceAll(text, `\"`, `"`)
 	splitText := strings.Split(text, "{")
+	splitText = append(splitText, strings.Split(text, ",")...)
 	splitText = append(splitText, strings.Split(text, ";")...)
 	splitText = append(splitText, strings.Split(text, "\n")...)
+	splitText = removeDuplicates(splitText)
+	log.Println("Scanning " + strconv.Itoa(len(splitText)) + "tokens")
 
 	var mu sync.Mutex
 	var wg sync.WaitGroup
@@ -180,24 +180,24 @@ func FindSecrets(text string) ToolData {
 
 					for _, provider := range signatures {
 						for service, regex := range provider.Keys {
-							re := regexp2.MustCompile(regex, 0)
-							variableNameMatch, _ := re.MatchString(variable.Name)
-							variableValueMatch, _ := re.MatchString(variable.Value)
+							re := regexp.MustCompile(regex)
+							variableNameMatch := re.FindAllString(variable.Name, 1)
+							variableValueMatch := re.FindAllString(variable.Value, 1)
 
 							match := variableValueMatch
-
 							if strings.Contains(strings.ToLower(service), "variable") {
 								match = variableNameMatch
 							}
 
-							if match {
+							if len(match) > 0 {
+
 								mu.Lock()
 
 								var tags []string
 
 								tags = append(tags, "regexMatched")
 
-								entropy := tsallisEntropy(variable.Value, 2)
+								entropy := tsallisEntropy(match[0], 2)
 
 								providerString := strings.ToLower(strings.Split(provider.Name, ".")[0])
 								if strings.Contains(strings.ToLower(text), providerString) && !strings.EqualFold(provider.Name, "Generic") {
@@ -206,6 +206,10 @@ func FindSecrets(text string) ToolData {
 
 								if len(variable.Value) > 16 {
 									tags = append(tags, "longString")
+								}
+
+								if len(variableValueMatch) > 0 {
+									variable.Value = variableValueMatch[0]
 								}
 
 								if len(variable.Value) > 8 {
@@ -243,10 +247,10 @@ func FindSecrets(text string) ToolData {
 	output = ToolData{
 		Tool:            "secretsnitch",
 		ScanTimestamp:   time.Now().UTC().Format("2006-01-02T15:04:05.000Z07:00"),
-		SourceUrl:       sourceUrl,
+		SourceUrl:       "",
 		Secrets:         secrets,
-		CapturedDomains: domains,
-		CapturedURLs:    removeDuplicates(capturedUrls),
+		CapturedDomains: []string{},
+		CapturedURLs:    []string{},
 	}
 
 	return output
@@ -294,15 +298,24 @@ func scanFile(filePath string, wg *sync.WaitGroup) {
 
 	text := string(data)
 
-	sourceUrl := grabSourceUrl(string(data))
+	sourceUrl := grabSourceUrl(text)
 	if sourceUrl != "" {
 		log.Println("Searching for secrets in: " + sourceUrl)
 	} else {
 		log.Println("Searching for secrets in: " + filePath)
 	}
 
+	text = strings.Replace(text, sourceUrl+"\n---\n", "", -1)
 	secrets := FindSecrets(text)
 	secrets.CacheFile = filePath
+
+	// Metadata collection
+	domains, _ := textsubs.DomainsOnly(text, false)
+	domains = textsubs.Resolve(domains)
+	secrets.CapturedDomains = domains
+
+	secrets.CapturedURLs = grabURLs(text)
+	secrets.SourceUrl = sourceUrl
 
 	if (*secretsOptional && len(secrets.Secrets) == 0) || len(secrets.Secrets) > 0 {
 		logSecrets(secrets, outputFile)
@@ -317,4 +330,5 @@ func scanFile(filePath string, wg *sync.WaitGroup) {
 			ScanFiles(successfulUrls)
 		}
 	}
+
 }
