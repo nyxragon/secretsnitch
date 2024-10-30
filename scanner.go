@@ -158,7 +158,7 @@ func FindSecrets(text string) ToolData {
 	splitText = append(splitText, strings.Split(text, ";")...)
 	splitText = append(splitText, strings.Split(text, "\n")...)
 	splitText = removeDuplicates(splitText)
-	log.Println("Scanning " + strconv.Itoa(len(splitText)) + "tokens")
+	log.Println("Scanning " + strconv.Itoa(len(splitText)) + " tokens")
 
 	var mu sync.Mutex
 	var wg sync.WaitGroup

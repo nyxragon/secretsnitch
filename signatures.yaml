@@ -177,6 +177,7 @@
 
 - OpenAI:
   - API Key: (?i)(sk-[a-zA-Z0-9]{20}T3BlbkFJ[a-zA-Z0-9]{20})
+  - API Key Variable: (?i)openai_api_key
 
 - OpenWeatherMap:
   - API Key: (?i)(?:https?://api\.openweathermap\.org/data/[a-z0-9.+?\/]+=)([a-z0-9]{32})
