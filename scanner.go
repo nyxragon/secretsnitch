@@ -16,7 +16,7 @@ import (
 	"mvdan.cc/xurls/v2"
 )
 
-type Secret struct {
+type SecretData struct {
 	Provider       string
 	ServiceName    string
 	Variable       string
@@ -28,7 +28,7 @@ type Secret struct {
 type ToolData struct {
 	Tool            string
 	ScanTimestamp   string
-	Secrets         []Secret
+	Secret          SecretData
 	CacheFile       string
 	SourceUrl       string
 	CapturedDomains []string
@@ -127,7 +127,12 @@ func grabURLs(text string) []string {
 func FindSecrets(text string) ToolData {
 
 	var output ToolData
-	var secrets []Secret
+	var secrets []SecretData
+	var mu sync.Mutex
+	var wg sync.WaitGroup
+
+	sourceUrl := grabSourceUrl(text)
+	text = strings.Replace(text, sourceUrl+"\n---\n", "", -1)
 
 	// Secret collection
 
@@ -139,7 +144,7 @@ func FindSecrets(text string) ToolData {
 			if strings.Contains(strings.ToLower(variable.Name), "pgp") {
 				serviceName = "PGP"
 			}
-			secret := Secret{
+			secret := SecretData{
 				Provider:       serviceName,
 				ServiceName:    "Private Key",
 				Variable:       variable.Name,
@@ -153,115 +158,144 @@ func FindSecrets(text string) ToolData {
 
 	// 2. Variable detection
 	text = strings.ReplaceAll(text, `\"`, `"`)
+	text = strings.ReplaceAll(text, `\'`, `'`)
 	splitText := strings.Split(text, "{")
 	splitText = append(splitText, strings.Split(text, ",")...)
 	splitText = append(splitText, strings.Split(text, ";")...)
 	splitText = append(splitText, strings.Split(text, "\n")...)
 	splitText = removeDuplicates(splitText)
-	log.Println("Scanning " + strconv.Itoa(len(splitText)) + " tokens")
+	log.Println("Scanning " + strconv.Itoa(len(splitText)) + " tokens for secrets")
 
-	var mu sync.Mutex
-	var wg sync.WaitGroup
+	// Channel for controlling the number of workers
+	workerLimit := make(chan struct{}, *maxWorkers)
 
-	lineChan := make(chan string, *maxWorkers)
-
-	for i := 0; i < *maxWorkers; i++ {
+	// Launch concurrent goroutines for each line with a limit on max workers
+	for _, line := range splitText {
 		wg.Add(1)
-		go func() {
+
+		// Acquire a spot in the worker pool
+		workerLimit <- struct{}{}
+
+		go func(line string) {
 			defer wg.Done()
-			for line := range lineChan {
-				data, _ := extractKeyValuePairs(line)
 
-				for _, variable := range data {
+			data, _ := extractKeyValuePairs(line)
+			for _, variable := range data {
 
-					if containsBlacklisted(variable.Value) {
-						continue
-					}
+				if containsBlacklisted(variable.Value) {
+					continue
+				}
 
-					for _, provider := range signatures {
-						for service, regex := range provider.Keys {
-							re := regexp.MustCompile(regex)
-							variableNameMatch := re.FindAllString(variable.Name, 1)
-							variableValueMatch := re.FindAllString(variable.Value, 1)
+				for _, provider := range signatures {
+					for service, regex := range provider.Keys {
+						re := regexp.MustCompile(regex)
+						variableNameMatch := re.FindAllString(variable.Name, 1)
+						variableValueMatch := re.FindAllString(variable.Value, 1)
 
-							match := variableValueMatch
-							if strings.Contains(strings.ToLower(service), "variable") {
-								match = variableNameMatch
+						match := variableValueMatch
+						if strings.Contains(strings.ToLower(service), "variable") {
+							match = variableNameMatch
+						}
+
+						if len(match) > 0 {
+
+							var tags []string
+							tags = append(tags, "regexMatched")
+							entropy := tsallisEntropy(match[0], 2)
+
+							providerString := strings.ToLower(strings.Split(provider.Name, ".")[0])
+							if strings.Contains(strings.ToLower(text), providerString) && !strings.EqualFold(provider.Name, "Generic") {
+								tags = append(tags, "providerDetected")
 							}
 
-							if len(match) > 0 {
+							if len(variable.Value) > 16 {
+								tags = append(tags, "longString")
+								tags = removeDuplicates(tags)
+							}
+
+							if len(variableValueMatch) > 0 {
+								variable.Value = variableValueMatch[0]
+							}
+
+							if len(variable.Value) >= 8 {
+
+								secret := SecretData{
+									Provider:       provider.Name,
+									ServiceName:    service,
+									Variable:       variable.Name,
+									Secret:         variable.Value,
+									TsallisEntropy: entropy,
+									Tags:           tags,
+								}
 
 								mu.Lock()
 
-								var tags []string
+								tagBytes, _ := json.Marshal(tags)
+								log.Println("\n---")
+								fmt.Printf("\nSECRET DETECTED:\n\t- Type: %s\n\t- Variable Name: %s\n\t- Value: %s\n\t- Tags: %s\n\t- Tsallis Entropy: %f\n",
+									provider.Name+" "+service,
+									variable.Name,
+									variable.Value,
+									string(tagBytes),
+									entropy)
 
-								tags = append(tags, "regexMatched")
+								domains, _ := textsubs.DomainsOnly(text, false)
+								domains = textsubs.Resolve(domains)
 
-								entropy := tsallisEntropy(match[0], 2)
+								capturedURLs := grabURLs(text)
 
-								providerString := strings.ToLower(strings.Split(provider.Name, ".")[0])
-								if strings.Contains(strings.ToLower(text), providerString) && !strings.EqualFold(provider.Name, "Generic") {
-									tags = append(tags, "providerDetected")
+								fmt.Printf("\nDOMAINS FOUND:\n")
+								for index, item := range domains {
+									fmt.Printf("\t- %d. %s\n", index, item)
 								}
 
-								if len(variable.Value) > 16 {
-									tags = append(tags, "longString")
+								fmt.Printf("\nURLs FOUND:\n")
+								for index, item := range capturedURLs {
+									fmt.Printf("\t- %d. %s\n", index+1, item)
+								}
+								fmt.Println()
+
+								output = ToolData{
+									Tool:            "secretsnitch",
+									ScanTimestamp:   time.Now().UTC().Format("2006-01-02T15:04:05.000Z07:00"),
+									SourceUrl:       sourceUrl,
+									Secret:          secret,
+									CacheFile:       makeCacheFilename(sourceUrl),
+									CapturedDomains: domains,
+									CapturedURLs:    capturedURLs,
 								}
 
-								if len(variableValueMatch) > 0 {
-									variable.Value = variableValueMatch[0]
+								if (*secretsOptional && output.Secret.Secret != "") || output.Secret.Secret != "" {
+									logSecret(output, outputFile)
 								}
 
-								if len(variable.Value) > 8 {
-									secret := Secret{
-										Provider:       provider.Name,
-										ServiceName:    service,
-										Variable:       variable.Name,
-										Secret:         variable.Value,
-										TsallisEntropy: entropy,
-										Tags:           removeDuplicates(tags),
-									}
-
-									if !containsSecret(secrets, secret) {
-										secrets = append(secrets, secret)
-									}
+								if !containsSecret(secrets, secret) {
+									secrets = append(secrets, secret)
 								}
 
 								mu.Unlock()
+
 							}
+
+							break
+
 						}
 					}
 				}
 			}
-		}()
+		}(line)
 	}
 
-	for _, line := range splitText {
-		lineChan <- line
-	}
-
-	close(lineChan)
-
+	// Wait for all goroutines to finish
 	wg.Wait()
 
-	output = ToolData{
-		Tool:            "secretsnitch",
-		ScanTimestamp:   time.Now().UTC().Format("2006-01-02T15:04:05.000Z07:00"),
-		SourceUrl:       "",
-		Secrets:         secrets,
-		CapturedDomains: []string{},
-		CapturedURLs:    []string{},
-	}
-
 	return output
-
 }
 
-func logSecrets(secrets ToolData, outputFile *string) {
-	unindented, _ := json.Marshal(secrets)
+func logSecret(secret ToolData, outputFile *string) {
+	unindented, _ := json.Marshal(secret)
+	// indented, _ := json.MarshalIndent(secrets, "", "	")
 	appendToFile(*outputFile, string(unindented))
-	indented, _ := json.MarshalIndent(secrets, "", "	")
-	fmt.Println(string(indented))
 }
 
 func ScanFiles(files []string) {
@@ -300,26 +334,12 @@ func scanFile(filePath string, wg *sync.WaitGroup) {
 
 	sourceUrl := grabSourceUrl(text)
 	if sourceUrl != "" {
-		log.Println("Searching for secrets in: " + sourceUrl)
+		log.Printf("Searching for secrets in: %s (cached at: %s)", sourceUrl, filePath)
 	} else {
-		log.Println("Searching for secrets in: " + filePath)
+		log.Printf("Searching for secrets in: %s", filePath)
 	}
 
-	text = strings.Replace(text, sourceUrl+"\n---\n", "", -1)
-	secrets := FindSecrets(text)
-	secrets.CacheFile = filePath
-
-	// Metadata collection
-	domains, _ := textsubs.DomainsOnly(text, false)
-	domains = textsubs.Resolve(domains)
-	secrets.CapturedDomains = domains
-
-	secrets.CapturedURLs = grabURLs(text)
-	secrets.SourceUrl = sourceUrl
-
-	if (*secretsOptional && len(secrets.Secrets) == 0) || len(secrets.Secrets) > 0 {
-		logSecrets(secrets, outputFile)
-	}
+	FindSecrets(text)
 
 	if *maxRecursions > 0 {
 		recursionCount++

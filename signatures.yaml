@@ -9,11 +9,11 @@
   - SES SMTP Password: (?i)ses_smtp_password[^\"'`\n]{0,40}[\"'`\n]{0,3}[A-Za-z0-9/+]{40,}
   - AWS Private Key: (?i)(?:ec2\-private\-key|EC2_PRIVATE_KEY)[^\"'`\n]{0,40}[\"'`\n]{0,3}[A-Za-z0-9/+]{40,}
   - MWS Token: (amzn\.mws\.[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})
-  - AppSync GraphQL Key: (da2-[a-z0-9]{26})
+  - AppSync GraphQL Key: \bda2-[a-z0-9]{26}
 
 - Microsoft:
-  - Azure API Key: (?i)(?:Ocp-Apim-Subscription-Key).{0,40}([a-f0-9)]{32})
-  - Azure Functions key: (?i)(?:x-functions-key:\s*)[a-zA-Z0-9\-_]{30,}
+  - Azure API Key Variable: (?i)Ocp-Apim-Subscription-Key
+  - Azure Functions Key Variable: (?i)x-functions-key
   # - Azure account key
   # - Azure account name
   - Azure Connection String: (?i)(.*.windows.net).+(password["':= ]{0,5}["':= ]{0,5}.{5,})
@@ -36,9 +36,9 @@
 
 - Twilio:
   - SendGrid API Key: (?i)(SG\.[\w\-_]{20,24}\.[\w\-_]{39,50})
-  - Account SID: \bAC[a-zA-Z0-9_\-]{32}
-  - App SID: AP[a-zA-Z0-9_\-]{32}
-  - API Key: SK[0-9a-fA-F]{32}
+  - Account SID: \bAC[a-zA-Z0-9_\-]{32}\b
+  - App SID: \bAP[a-zA-Z0-9_\-]{32}\b
+  - API Key: \bSK[0-9a-fA-F]{32}\b
 
 - Atlassian: 
   - JIRA Token: (?i)(?:jira)[^{}()<>?*&:%@!\/= \n]{0,20}[\"\'`]?\s{0,50}\b(?::|=>|=|,)\s{0,50}[\"\'`]?([a-zA-Z-0-9]{24})
@@ -294,13 +294,6 @@
 - WeChat:
   - App Key: (?:^|['\"`])(wx[a-f0-9]{16})(?:$|['\"`])
 
-- Generic URL:
-  - Auth: (?i)((https?|ftps?|ssh|sftp)://[^":@>\]\[\n\s*/]+:[^:@/>\]\[\n\s*/]+([^>\]\[\n\s*:][@]{1})\w+(\.\w+)+)
-  - Redis: (?i)((redis?)://[^":@>\]\[\n\s*/]+:[^:@/>\]\[\n\s*/]+([^>\]\[\n\s*:][@]{1})\w+(\.\w+)+)
-  - MongoDB: (?i)(?:mongodb:|mongodb\+srv:)//[\S]{1,256}:[\S]{1,256}@[-.%\w\/:]+\.[\S]+
-  - MySQL: (?i)(?:mysql:)//[\S]{1,256}:[\S]{1,256}@[-.%\w\/:]+\.[\S]+
-  - FTP: ftp://[a-zA-Z0-9-_+.@]+:[^@]+@[^/]+
-  - Postgres: (?i)(?:pgsql:|postgres:|postgresql:)//[\S]{1,256}:[\S]{1,256}@[-.%\w\/:]+\.[\S]+
 
 - Generic:
   - Shell Command: >
@@ -316,6 +309,14 @@
   - Password Variable: (?i)password
   - API Key Variable: (?i)_api_key
   - Secret Key Variable: (?i)_secret_key
+  
+  # URLs
+  - Auth URL: (?i)((https?|ftps?|ssh|sftp)://[^":@>\]\[\n\s*/]+:[^:@/>\]\[\n\s*/]+([^>\]\[\n\s*:][@]{1})\w+(\.\w+)+)
+  - Redis URL: (?i)((redis?)://[^":@>\]\[\n\s*/]+:[^:@/>\]\[\n\s*/]+([^>\]\[\n\s*:][@]{1})\w+(\.\w+)+)
+  - MongoDB URL: (?i)(?:mongodb:|mongodb\+srv:)//[\S]{1,256}:[\S]{1,256}@[-.%\w\/:]+\.[\S]+
+  - MySQL URL: (?i)(?:mysql:)//[\S]{1,256}:[\S]{1,256}@[-.%\w\/:]+\.[\S]+
+  - FTP URL: ftp://[a-zA-Z0-9-_+.@]+:[^@]+@[^/]+
+  - Postgres URL: (?i)(?:pgsql:|postgres:|postgresql:)//[\S]{1,256}:[\S]{1,256}@[-.%\w\/:]+\.[\S]+
 
 - PuTTY:
   - RSA Private Key: >

@@ -79,7 +79,7 @@ func scrapeURL(url string) {
 		}
 
 		waitTime := time.Duration(1+rand.Intn(timeoutSeconds)) * time.Second
-		log.Printf("No data received from %s, retrying in %v... (%d/%d)\n", url, waitTime, retryCount, maxRetries)
+		log.Printf("No data received from %s, retrying in %v... (%d/%d)\n", url, waitTime, retryCount, *maxRetries)
 		time.Sleep(waitTime)
 	}
 }

@@ -76,7 +76,7 @@ func grabSourceUrl(text string) string {
 	return ""
 }
 
-func containsSecret(secrets []Secret, target Secret) bool {
+func containsSecret(secrets []SecretData, target SecretData) bool {
 	for _, s := range secrets {
 		if s.Provider == target.Provider &&
 			s.ServiceName == target.ServiceName &&
