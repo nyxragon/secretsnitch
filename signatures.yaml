@@ -2,12 +2,12 @@
 - Amazon:
   - Access Key: (?:A3T[A-Z0-9]|AKIA|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA|ABIA|ACCA)[A-Z0-9]{16}
   - Secret Access Key: (amazon|amz)_{0,1}secret(_access_key|accesskey)
-  - Cognito User Pool ID: (?i)us-[a-z]{2,}-[a-z]{4,}-\d{1,}
+  # - Cognito User Pool ID: (?i)us-[a-z]{2,}-[a-z]{4,}-\d{1,}
   - RDS Password: (?i)(rds\-master\-password|db\-password)[^\"'`\n]{0,40}[\"'`\n]{0,3}[a-zA-Z0-9@#*+=]{8,}
-  - S3 Private Key: (?i)(AWS_S3_PRIVATE_KEY|s3_key)[^\"'`\n]{0,40}[\"'`\n]{0,3}[a-zA-Z0-9/+=]{40}
+  - S3 Private Key Variable: (?i)AWS_S3_PRIVATE_KEY|s3_key|S3_PRIVATE_KEY
   - SNS Confirmation Token: (?i)SubscribeURL":"https:\/\/sns\.[a-z0-9-]+\.amazonaws\.com\/?Action=ConfirmSubscription&Token=[a-zA-Z0-9-=_]+
-  - SES SMTP Password: (?i)ses_smtp_password[^\"'`\n]{0,40}[\"'`\n]{0,3}[A-Za-z0-9/+]{40,}
-  - AWS Private Key: (?i)(?:ec2\-private\-key|EC2_PRIVATE_KEY)[^\"'`\n]{0,40}[\"'`\n]{0,3}[A-Za-z0-9/+]{40,}
+  - SES SMTP Password Variable: (?i)ses_smtp_password
+  - AWS Private Key Variable: (?i)?:ec2\-private\-key|EC2_PRIVATE_KEY
   - MWS Token: (amzn\.mws\.[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})
   - AppSync GraphQL Key: \bda2-[a-z0-9]{26}
 
@@ -22,11 +22,11 @@
   - Graph API Key: (?i)MSGRAPH_[a-zA-Z0-9\-_]{20,40}
   - Outlook Webhook URL Token: (?i)https:\/\/outlook\.office\.com\/webhook\/[A-Za-z0-9\-]{60,}
   - Webhook URL Token: (?i)https:\/\/outlook\.office\.com\/webhook\/[A-Za-z0-9\-]{60,}
-#  - OneDrive Access Token: (?i)(?:onedrive_access_token)[\"\'=:\s]{0,3}([a-zA-Z0-9\-_]{40,})
+  - OneDrive Access Token Variable: (?i)onedrive_access_token
 
 - DigitalOcean:
   - API Key: (?i)do_[a-z0-9]{60}
-  #- Environment Variable: (?i)(DO|DIGITALOCEAN).+(API|OAUTH|ACCESS)*(TOKEN|KEY)=.{8,128}
+  - Environment Variable: (?i)(DO|DIGITALOCEAN).+(API|OAUTH|ACCESS)*(TOKEN|KEY)
 
 - Shopify:
   - Custom App Token: (?i)shpca_[a-fA-F0-9]{32}
@@ -35,7 +35,7 @@
   - Private Access Token: (?i)shppa_[a-fA-F0-9]{32}
 
 - Twilio:
-  - SendGrid API Key: (?i)(SG\.[\w\-_]{20,24}\.[\w\-_]{39,50})
+  - SendGrid API Key: \b(?i)SG\.[\w\-_]{20,24}\.[\w\-_]{39,50}\b
   - Account SID: \bAC[a-zA-Z0-9_\-]{32}\b
   - App SID: \bAP[a-zA-Z0-9_\-]{32}\b
   - API Key: \bSK[0-9a-fA-F]{32}\b
@@ -54,7 +54,7 @@
   - Firebase URL: (?i)https:\/\/[a-z0-9-]+\.firebaseio\.com\/.*.json
   - Firebase Cloud Messaging API Key: (?i)([0-9a-zA-Z_-]{11}:APA91b[0-9a-zA-Z_-]{134})
   - Signed URL: (?i)https:\/\/storage\.googleapis\.com\/[A-Za-z0-9\/-]+?GoogleAccessId=[A-Za-z0-9-]+&Expires=\d+&Signature=[A-Za-z0-9%]+
-  - Cloud Service Account Private Key: (?i)"private_key":\s*"-----BEGIN PRIVATE KEY-----[A-Za-z0-9\/+=\n]+-----END PRIVATE KEY-----"
+  - Cloud Service Account Private Key: (?i)"-----BEGIN PRIVATE KEY-----[A-Za-z0-9\/+=\n]+-----END PRIVATE KEY-----"
   - Cloud Service Account Key ID: >
       (?i)"private_key_id":\s*"[a-f0-9]{32}"
   - Cloud Project Number: >
@@ -69,7 +69,7 @@
   - App user Token: (?i)ghs_[A-Za-z0-9_]{35,38}
   - Device Code: GH_[a-zA-Z0-9_]{9,30}
   - Refresh Token: (?i)ghr_[A-Za-z0-9_]{35,38}
-  - Webhook Secret: (?i)(whsec_[A-Za-z0-9]{31,38})
+  - Webhook Secret: (?i)whsec_[A-Za-z0-9]{31,38}
   - Authentication URL: >
       [a-zA-Z0-9_-]*:[a-zA-Z0-9_\-]+@github\.com*
 
