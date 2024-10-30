@@ -1,7 +1,7 @@
 ---
 - Amazon:
   - Access Key: (?:A3T[A-Z0-9]|AKIA|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA|ABIA|ACCA)[A-Z0-9]{16}
-  - Secret Access Key: (amazon|amz)_{0,1}secret(_access_key|accesskey)
+  - Secret Access Key Variable: (?i)(amazon|amz|aws)[-_]{0,1}(secret)[-_]{0,1}((access)[-_]{0,1}){0,1}key
   # - Cognito User Pool ID: (?i)us-[a-z]{2,}-[a-z]{4,}-\d{1,}
   - RDS Password: (?i)(rds\-master\-password|db\-password)[^\"'`\n]{0,40}[\"'`\n]{0,3}[a-zA-Z0-9@#*+=]{8,}
   - S3 Private Key Variable: (?i)AWS_S3_PRIVATE_KEY|s3_key|S3_PRIVATE_KEY
