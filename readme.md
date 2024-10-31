@@ -191,7 +191,9 @@ Grabs the latest URL archive from the Phishtank API. It then begins downloading 
 
 #### Basic flow
 
-reserved
+The basic operation of the tool is as follows
+
+<img src = "media/secretsnitch_basic.drawio.png" alt = "Basic workflow">
 
 #### Modules
 
@@ -292,7 +294,7 @@ This file contains a list of regular expressions that the tool uses to catch sec
 
     It contains two classifications of regular expressions:
 
-  - Variable patterns: These are patterns that are used to check for variable names where the secret may not have a recognizable pattern, for example, passwords. These are marked by the usage of the word `Variable` at the end of the signature key.
+  - Variable patterns: These are patterns that are used to check for variable names where the secret may not have a recognizable pattern (for example, passwords). These are marked by the usage of the word `Variable` at the end of the signature's key.
 
   - Secret patterns: these are patterns that are commonly used by secrets, for example, `AIza...` for GCP keys, `AKIA` for AWS keys and so on.
 
@@ -300,11 +302,6 @@ This file contains a list of regular expressions that the tool uses to catch sec
 This file contains a list of blacklist patterns that are skipped. These include things like blob data patterns for images and audio, certain placeholderstrings etc.
 
 These files are parsed, then the compiled patterns are matched against variable names and values using Golang's `regexp` library in a loop. The result from the `FindSecrets()` function is returned as a slice of `ToolData` and is logged immediately.
-
-
-#### Contribution
-
-Want to contribute? Please read the [contributing documentation](contributing.md).
 
 ## Troubleshooting and tips
 
@@ -348,6 +345,10 @@ For Windows, try the following
 7. Go to the `dockerSelenium.go` file and replace `unix:///var/run/docker.sock` with `http://localhost:2375`.
 
 If you can successfully build the docker image manually but can't trigger it via secretsnitch, try running the tool as superuser via `sudo`.
+
+## Contribution
+
+This tool needs contributors to grow and become extremely versatile and powerful. Please read the [contributing documentation](contributing.md) if you'd like to contribute.
 
 ## Acknowledgements
 
