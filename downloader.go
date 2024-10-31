@@ -29,6 +29,7 @@ var (
 
 func scrapeURL(url string) {
 	var retryCount int
+	cacheFileName := makeCacheFilename(url)
 
 	for {
 		client := &http.Client{
@@ -58,11 +59,11 @@ func scrapeURL(url string) {
 				} else {
 					responseString := url + "\n---\n" + string(body)
 
-					err = os.WriteFile(makeCacheFilename(url), []byte(responseString), 0644)
+					err = os.WriteFile(cacheFileName, []byte(responseString), 0644)
 					if err != nil {
 						log.Printf("Failed to write response body to file: %s\n", err)
 					} else {
-						log.Printf("Content from %s saved to %s\n", url, cacheDir)
+						log.Printf("Content from %s saved to %s\n", url, cacheFileName)
 					}
 				}
 				break
@@ -87,17 +88,15 @@ func scrapeURL(url string) {
 func fetchFromUrlList(urls []string) []string {
 	var wg sync.WaitGroup
 	urlChan := make(chan string)
-	var processedUrls []string
 
-	var successfulDownloads []string
+	var toDownload []string
 
 	for _, url := range urls {
-		if !fileExists(makeCacheFilename(url)) {
-			processedUrls = append(processedUrls, url)
-		} else {
+		if fileExists(makeCacheFilename(url)) {
 			log.Printf("Skipping %s as it is already cached at %s", url, makeCacheFilename(url))
-			successfulDownloads = append(successfulDownloads, makeCacheFilename(url))
+			continue
 		}
+		toDownload = append(toDownload, url)
 	}
 
 	for i := 0; i < *maxWorkers; i++ {
@@ -110,20 +109,21 @@ func fetchFromUrlList(urls []string) []string {
 		}()
 	}
 
-	for _, url := range processedUrls {
+	for _, url := range toDownload {
 		urlChan <- url
 	}
 
 	close(urlChan)
 	wg.Wait()
 
+	var downloadedPaths []string
 	cachedFiles, _ := listCachedFiles()
-	for _, url := range processedUrls {
+	for _, url := range urls {
 		cachedFileName := makeCacheFilename(url)
 		if sliceContainsString(cachedFiles, cachedFileName) {
-			successfulDownloads = append(successfulDownloads, cachedFileName)
+			downloadedPaths = append(downloadedPaths, cachedFileName)
 		}
 	}
 
-	return successfulDownloads
+	return downloadedPaths
 }

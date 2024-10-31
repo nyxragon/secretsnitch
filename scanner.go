@@ -38,16 +38,13 @@ type ToolData struct {
 func grabURLs(text string) []string {
 
 	var captured []string
-	location := substringBeforeFirst(text, "---")
+	sourceUrl := grabSourceUrl(text)
 
-	baseUrl, _ := baseURL(location)
+	baseUrl, _ := baseURL(sourceUrl)
 
 	if !strings.HasSuffix(baseUrl, "/") {
 		baseUrl += "/"
 	}
-
-	// remove metadata URL
-	text = strings.Replace(text, location, "", -1)
 
 	scanner := bufio.NewScanner(strings.NewReader(text))
 
@@ -78,8 +75,6 @@ func grabURLs(text string) []string {
 	splitText = append(splitText, strings.Split(text, "\n")...)
 	splitText = removeDuplicates(splitText)
 
-	protocol := substringBeforeFirst(location, "://")
-
 	for _, line := range splitText {
 
 		re := regexp.MustCompile(`(?:href|src|action|cite|data|formaction|poster)\s*=\s*["']([^"']+)["']`)
@@ -90,9 +85,13 @@ func grabURLs(text string) []string {
 			resource := matchGroups[1]
 
 			if !strings.Contains(resource, "://") && !strings.HasPrefix(resource, "//") {
+				resource = strings.TrimPrefix(resource, "/")
 				resource = baseUrl + resource
 			} else if !strings.Contains(resource, "://") && strings.HasPrefix(resource, "//") {
-				resource = protocol + ":" + resource
+				resource = "https:" + resource
+				if strings.Contains(resource, "http://") {
+					resource = "http:" + resource
+				}
 			}
 
 			captured = append(captured, resource)
@@ -106,7 +105,7 @@ func grabURLs(text string) []string {
 
 	var urls []string
 	for _, url := range captured {
-		if strings.Contains(url, "://") && strings.Contains(url, ".") && !strings.Contains(url, "'") {
+		if strings.Contains(url, "://") && strings.Contains(url, ".") && !strings.Contains(url, "'") && url != sourceUrl {
 			urls = append(urls, url)
 		}
 	}
@@ -132,7 +131,6 @@ func FindSecrets(text string) ToolData {
 	var wg sync.WaitGroup
 
 	sourceUrl := grabSourceUrl(text)
-	text = strings.Replace(text, sourceUrl+"\n---\n", "", -1)
 
 	// Secret collection
 
@@ -273,7 +271,7 @@ func FindSecrets(text string) ToolData {
 
 							}
 
-							//break
+							break
 
 						}
 					}
@@ -346,7 +344,7 @@ func scanFile(filePath string, wg *sync.WaitGroup) {
 		urls := grabURLs(string(data))
 		successfulUrls := fetchFromUrlList(urls)
 
-		if recursionCount < *maxRecursions {
+		if recursionCount <= *maxRecursions {
 			ScanFiles(successfulUrls)
 		}
 	}

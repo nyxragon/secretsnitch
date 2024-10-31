@@ -123,6 +123,12 @@ func setFlags() {
 		os.Exit(-1)
 	}
 
+	if *maxRecursions < 1 {
+		//pflag.Usage()
+		fmt.Println("You cannot recursively crawl the page 0 times.")
+		os.Exit(-1)
+	}
+
 	if !*github && !*gitlab && !*phishtank && *URL == "" && *urlList == "" && *directory == "" && *file == "" && !*githubGists {
 		pflag.Usage()
 		fmt.Println("Come on, you'll have to pick some option!")
