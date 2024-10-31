@@ -32,6 +32,8 @@ A lightning-fast, modular secret scanner and endpoint extractor in Golang!
 
 #### GitHub commits in a range
 
+reserved
+
 #### Stolen Phishing keys
 
 Running secretsnitch with the following command:
