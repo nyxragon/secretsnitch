@@ -55,9 +55,40 @@ https://0x4f.in
 This page has a hardcoded OpenAI API Key in a Javascript file that it calls, named `security.js`. Simply running secretsnitch with the following command:
 
 ```
-go build
-./secretsnitch --url=https://0x4f.in --recursions=1
+❯ go build
+❯ ./secretsnitch --url=https://0x4f.in --recursions=1
 ```
+
+This gives you the following output:
+```
+2024/10/31 06:25:48 Content from https://0x4f.in saved to .urlCache/
+2024/10/31 06:25:48 Searching for secrets in: https://0x4f.in (cached at: .urlCache/495c7d01.cache)
+2024/10/31 06:25:50 Content from https://0x4f.in/assets/images/taskerauto.png saved to .urlCache/
+2024/10/31 06:25:50 Content from https://0x4f.in/assets/images/favicon.ico saved to .urlCache/
+2024/10/31 06:25:50 Content from https://0x4f.in//assets/js/security.js saved to .urlCache/
+2024/10/31 06:25:50 Content from https://github.com/sponsors/0x4f53/ saved to .urlCache/
+2024/10/31 06:25:50 Content from https://play.google.com/store/apps/details?id=zeroxfourf.wristkey saved to .urlCache/
+...
+```
+
+Once all the pages are cached, the secret scanning begins.
+
+```
+...
+2024/10/31 06:28:01 Searching for secrets in: https://0x4f.in//assets/js/security.js (cached at: .urlCache/bf212e67.cache)
+2024/10/31 06:28:02 
+---
+
+SECRET DETECTED:
+        - Type: OpenAI Service API Key
+        - Variable Name: openAiApiKey
+        - Value: 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";
+        - Tags: ["regexMatched","providerDetected","longString"]
+        - Tsallis Entropy: 0.979678
+...
+```
+
+And thus, the secret is caught.
 
 ### Modules
 
@@ -137,7 +168,9 @@ reserved
 
 reserved
 
-## Troubleshooting
+## Troubleshooting and tips
+
+### URL Cache contains data that's too old.
 
 ### GitHub rate limits
 

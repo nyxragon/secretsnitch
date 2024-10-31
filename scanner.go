@@ -171,6 +171,12 @@ func FindSecrets(text string) ToolData {
 
 	// Launch concurrent goroutines for each line with a limit on max workers
 	for _, line := range splitText {
+
+		domains, _ := textsubs.DomainsOnly(text, false)
+		domains = textsubs.Resolve(domains)
+
+		capturedURLs := grabURLs(text)
+
 		wg.Add(1)
 
 		// Acquire a spot in the worker pool
@@ -218,6 +224,7 @@ func FindSecrets(text string) ToolData {
 							}
 
 							if len(variable.Value) >= 8 {
+								mu.Lock()
 
 								secret := SecretData{
 									Provider:       provider.Name,
@@ -228,7 +235,16 @@ func FindSecrets(text string) ToolData {
 									Tags:           tags,
 								}
 
-								mu.Lock()
+								fmt.Printf("\nDOMAINS FOUND:\n")
+								for index, item := range domains {
+									fmt.Printf("\t- %d. %s\n", index+1, item)
+								}
+
+								fmt.Printf("\nURLs FOUND:\n")
+								for index, item := range capturedURLs {
+									fmt.Printf("\t- %d. %s\n", index+1, item)
+								}
+								fmt.Println()
 
 								tagBytes, _ := json.Marshal(tags)
 								log.Println("\n---")
@@ -238,22 +254,6 @@ func FindSecrets(text string) ToolData {
 									variable.Value,
 									string(tagBytes),
 									entropy)
-
-								domains, _ := textsubs.DomainsOnly(text, false)
-								domains = textsubs.Resolve(domains)
-
-								capturedURLs := grabURLs(text)
-
-								fmt.Printf("\nDOMAINS FOUND:\n")
-								for index, item := range domains {
-									fmt.Printf("\t- %d. %s\n", index, item)
-								}
-
-								fmt.Printf("\nURLs FOUND:\n")
-								for index, item := range capturedURLs {
-									fmt.Printf("\t- %d. %s\n", index+1, item)
-								}
-								fmt.Println()
 
 								output = ToolData{
 									Tool:            "secretsnitch",
@@ -265,10 +265,6 @@ func FindSecrets(text string) ToolData {
 									CapturedURLs:    capturedURLs,
 								}
 
-								if (*secretsOptional && output.Secret.Secret != "") || output.Secret.Secret != "" {
-									logSecret(output, outputFile)
-								}
-
 								if !containsSecret(secrets, secret) {
 									secrets = append(secrets, secret)
 								}
@@ -277,7 +273,7 @@ func FindSecrets(text string) ToolData {
 
 							}
 
-							break
+							//break
 
 						}
 					}
@@ -339,7 +335,11 @@ func scanFile(filePath string, wg *sync.WaitGroup) {
 		log.Printf("Searching for secrets in: %s", filePath)
 	}
 
-	FindSecrets(text)
+	output := FindSecrets(text)
+
+	if (*secretsOptional && len(output.CapturedDomains) > 0) || output.Secret.Secret != "" {
+		logSecret(output, outputFile)
+	}
 
 	if *maxRecursions > 0 {
 		recursionCount++
