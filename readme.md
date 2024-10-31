@@ -140,6 +140,8 @@ This page has a hardcoded OpenAI API Key in a Javascript file that it calls, nam
 ❯ ./secretsnitch --url=https://0x4f.in --recursions=1 --retries=0
 ```
 
+Here, the `recursions` flag is set to `1`. This means that only the first layer of URLs within this page will be scanned, and not the URLs within those pages. `retries` being set to `0` means if a page can't be scraped, it will be left alone.
+
 This gives you the following output:
 
 ```bash
@@ -200,12 +202,17 @@ The basic operation of the tool is as follows
 
 #### Modules
 
+##### Services
+
 - **github**: Scan public GitHub commits from the past hour
   - (optional) **from**: Timestamp to start from (format: 2006-01-02-15)
   - (optional) **to**:   Timestamp to stop at (format: 2006-01-02-15)
 - **github-gists**:      Scan the last 100 public GitHub Gists
 - **gitlab**:            Scan the last 100 public GitLab commits
 - **phishtank**:         Scan reported phishtank.org URLs from the past day
+
+##### Miscelllaneous
+
 - **url**:  A single URL to scan. *Tip: some URLs use client-side Javascript rendering (CSR). Use the `--selenium` flag to beat this and scraped rendered pages.*
 - **urlList**:           A line-separated file containing a list of URLs to scan for secrets
 - **directory**:         Scan an entire directory. *Tip: if you're bored waiting for pages to finish scraping, you can simply terminate the program and run it with `--directory=.urlCache/`* ;)
@@ -224,7 +231,6 @@ go get -u github.com/0x4f53/secretsnitch
 This tool supports caching in order to save you some time. When a single URL or a list of URLs is supplied to the tool, each URL is sent to a worker. Each worker then scrapes and logs it to a patch file stored in `.urlCache/`. The named of each file is an MD5 hash of the URL in a primary-key like fashion, to make it easy to store, retrieve and detect the presence of pre-cached files without using a database.
 
 <img src = "media/secretsnitch_caching.drawio.png" alt = "Caching workflow">
-
 
 This is quite useful in several scenarios, such as when starts are restarted with reduced workers if the tool crashes, or if the tool is restarted due to rate-limits being indefinite.
 
@@ -318,7 +324,7 @@ These files are parsed, then the compiled patterns are matched against variable 
 
 ### False positives and false negatives
 
-Some false positive secrets simply cannot be mitigated. Others, however, can be improved through continuous improvement of the signatures list and the algorithms. False negatives may also occur if the secret patterns are too strict. 
+Some false positive secrets simply cannot be mitigated. Others, however, can be improved through continuous improvement of the signatures list and the algorithms. False negatives may also occur if the secret patterns are too strict.
 
 If you have any ideas to prevent false positives and false negatives, please [raise an issue](https://github.com/0x4f53/secretsnitch/issues) or [contribute](contributing.md) to the project.
 
@@ -349,7 +355,7 @@ sudo usermod -aG docker $USER
 newgrp docker
 ```
 
-And try again. 
+And try again.
 
 For Windows, try the following
 
