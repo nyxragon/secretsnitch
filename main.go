@@ -20,6 +20,8 @@ func main() {
 
 	setFlags()
 
+	logo()
+
 	signatures = readSignatures()
 
 	if *urlList != "" {

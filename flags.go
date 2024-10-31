@@ -50,10 +50,14 @@ var (
 	selenium *bool
 )
 
+func logo() {
+	fmt.Println("\nSecretsnitch - A lightning-fast secret scanner in Golang!")
+	fmt.Println("https://github.com/0x4f53/secretsnitch")
+	fmt.Println("Copyright © 2024 Owais Shaikh")
+}
+
 func customUsage() {
-	fmt.Println("\nSecretsnitch\nhttps://github.com/0x4f53/secretsnitch")
-	fmt.Println("")
-	fmt.Println("A lightning-fast secret scanner in Golang!")
+	logo()
 	fmt.Println("")
 	fmt.Fprintf(os.Stderr, "Usage:\n%s [input options] [output options]\n", os.Args[0])
 	fmt.Println("")
@@ -120,12 +124,6 @@ func setFlags() {
 	if *maxWorkers < 2 {
 		//pflag.Usage()
 		fmt.Println("Please use at least 2 workers for efficient concurrency.")
-		os.Exit(-1)
-	}
-
-	if *maxRecursions < 1 {
-		//pflag.Usage()
-		fmt.Println("You cannot recursively crawl the page 0 times.")
 		os.Exit(-1)
 	}
 

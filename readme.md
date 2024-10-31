@@ -1,4 +1,4 @@
-[![Golang](https://img.shields.io/badge/Golang-fff.svg?style=flat-square&logo=go)](https://go.dev)
+[![Golang](https://img.shields.io/badge/Golang-eee.svg?style=flat-square&logo=go)](https://go.dev)
 [![License](https://img.shields.io/badge/License-GPLv3-purple?style=flat-square&logo=libreoffice)](LICENSE)
 [![Latest Version](https://img.shields.io/github/v/tag/0x4f53/secretsnitch?label=Version&style=flat-square&logo=semver)](https://github.com/0x4f53/secretsnitch/releases)
 
@@ -10,41 +10,104 @@ Presented at
 
 # Secretsnitch
 
-A lightning-fast, modular secret scanner and endpoint extractor in Golang! 
+A lightning-fast, modular secret scanner and endpoint extractor in Golang!
 
-- Concurrent Scanning: fast and efficient scanning with thousands of Goroutines at once
+- **Concurrent scanning**: fast and efficient scanning with thousands of Goroutines at once
 
-- Modular Design: Supports GitHub, GitLab, Phishtank and random web scraping via flags
+- **Modular design**: Supports GitHub, GitLab, Phishtank and random web scraping via flags
 
-- Efficient Network usage: reduced network usage with caching and instant output logging
+- **Efficient networking**: reduced network usage with caching and instant output logging
 
-- Comprehensive Secret checks: huge signature list for variable names, secret strings etc combined with metadata and entropy scoring
+- **Comprehensive checks**: huge signature list for variable names, secret strings etc combined with metadata and entropy scoring
 
-- User-Friendly: Designed for ease of use by pentesters, bounty hunters, or enterprise users via simple command-line execution
+- **User-friendly**: Designed for ease of use by pentesters, bounty hunters, or enterprise users via simple command-line execution
 
-- Community-Driven Signatures: sourced from Google searches, ChatGPT, and open-source lists like GitGuardian.
+- **Community-driven**: sourced from Google searches, ChatGPT, and open-source lists like GitGuardian.
 
-- Easy Contribution: Find a missing secret or blacklist regular expression? Simply make a pull request by following the [contributing.md] guide!
+- **Easy contribution**: Find a missing secret or blacklist regular expression? Simply make a pull request by following the [contributing.md] guide!
 
-## How it works
+## Usage
 
-### Examples 
+```bash
+❯ ./secretsnitch -h⠀⠀
 
-#### GitHub commits in a range
+Secretsnitch - A lightning-fast secret scanner in Golang!
+https://github.com/0x4f53/secretsnitch
+Copyright © 2024 Owais Shaikh
 
-reserved
+Usage:
+./secretsnitch [input options] [output options]
 
-#### Stolen Phishing keys
+Input (pick at least one):
 
-Running secretsnitch with the following command:
+  --github                  Scan public GitHub commits from the past hour
+    --from                  (optional) Timestamp to start from (format: 2006-01-02-15)
+    --to                    (optional) Timestamp to stop at (format: 2006-01-02-15)
+
+  --github-gists            Scan the last 100 public GitHub Gists
+
+  --gitlab                  Scan the last 100 public GitLab commits
+
+  --phishtank               Scan reported phishtank.org URLs from the past day
+
+  --url=<http://url>        A single URL to scan
+  --urlList=<file>          A line-separated file containing a list of URLs to scan for secrets
+
+  --directory=<directory/>  Scan an entire directory
+  --file=<file.js>          Scan a file
+
+Optional arguments:
+
+  --output                  Save scan output to a custom location
+
+  --workers                 Maximum number of workers to use (default: 5000)
+
+  --recursions=<number>     Crawl URLs and hyperlinks inside targets (default: 0)
+
+  --retries=<number>        Maximum retries before giving up (default: 3)
+
+  --secrets-optional        Display other data (such as endpoints, domains etc.) even if there are no secrets
+
+  --selenium                Scrape page using Selenium. This helps with pages that run client-side Javascript (note: this is slower)
+
+pflag: help requested
+```
+
+### Examples
+
+#### All GitHub commits in a range (GitHub module)
+
+GitHub uses something called "patch" files to keep track of changes that are made to repositories. These days, git has an in-built integration to prevent secret exposures. However, several secrets still slip by and some archived commits from the past may still contain secrets.
+
+Lets say you would like to scan for commits from January 10, 2023 at 3 PM to January 15 2023 at 12 AM. You can run the below command
+
+The GitHub module lets you search for secrets based on a commit timestamp. It generates patch files from a dataset that Gharchive hosts, then tries scraping those links.
+
+```bash
+./secretsnitch --github --from=2024-01-10-15 --to=2024-01-15-0 --workers=100
+```
+
+Since the public GitHub API has rate limits, I recommend reducing the number of workers to strike the right balance between scraping commit files quickly and not exceed the official rate limit.
+
+This results in the following output
+
+```bash
+Secretsnitch - A lightning-fast secret scanner in Golang!
+https://github.com/0x4f53/secretsnitch
+Copyright © 2024 Owais Shaikh
+Downloading and extracting non-concurrently...
+JSON file .githubCommits//2024-10-31-13.json already exists. Continuing...
+2024/10/31 20:31:40 Skipping https://github.com/cellatlas/human/commit/55f43f34ca277991e3a9b96a490999ea6e524d8b.patch as it is already cached at .urlCache/b65fb311.cache
+2024/10/31 20:31:40 Skipping https://github.com/omarzydan610/Calculator_React-SpringBoot/commit/6b26bcd9f9e926dc5cc03cbd7f5cab01b966bced.patch as it is already cached at .urlCache/156e201d.cache
+...
 
 ```
-go build
-./secretsnitch --phishtank
+
+If you want to run the scan on just the last hour, simply run the command without the `from` and `to` flags.
+
+```bash
+./secretsnitch --github --workers=100
 ```
-
-Grabs the latest URL archive from the Phishtank API. It then begins downloading and scraping all the pages from Phishtank first, post which the secret analysis begins.
-
 
 #### Single URLs
 
@@ -54,72 +117,127 @@ https://0x4f.in
 
 This page has a hardcoded OpenAI API Key in a Javascript file that it calls, named `security.js`. Simply running secretsnitch with the following command:
 
-```
+```bash
 ❯ go build
-❯ ./secretsnitch --url=https://0x4f.in --recursions=1
+❯ ./secretsnitch --url=https://0x4f.in --recursions=1 --retries=0
 ```
 
 This gives you the following output:
-```
+
+```bash
 2024/10/31 06:25:48 Content from https://0x4f.in saved to .urlCache/
 2024/10/31 06:25:48 Searching for secrets in: https://0x4f.in (cached at: .urlCache/495c7d01.cache)
-2024/10/31 06:25:50 Content from https://0x4f.in/assets/images/taskerauto.png saved to .urlCache/
-2024/10/31 06:25:50 Content from https://0x4f.in/assets/images/favicon.ico saved to .urlCache/
 2024/10/31 06:25:50 Content from https://0x4f.in//assets/js/security.js saved to .urlCache/
-2024/10/31 06:25:50 Content from https://github.com/sponsors/0x4f53/ saved to .urlCache/
 2024/10/31 06:25:50 Content from https://play.google.com/store/apps/details?id=zeroxfourf.wristkey saved to .urlCache/
 ...
+
+2024/10/31 20:32:30 
+---
+
+SECRET DETECTED:
+    - Type:            Generic Password Variable
+    - Variable Name:   password
+    - Value:           Tes█████████
+    - Position:        26:27
+    - Source:          https://github.com/kal█████████████████████████████████████████████a8f37b12b061db16f5a13e.patch
+    - Cached Location: .urlCache/674d3824.cache
+    - Tags:            ["regexMatched"]
+    - Tsallis Entropy: 0.843750
+2024/10/31 20:32:30 Searching for secrets in: https://github.com/aaron-hwang/SRL/commit/d1e34fad5b7bdda6498ec5b6654323cbb0754c1a.patch (cached at: .urlCache/def4ec10.cache)
 ```
 
-Once all the pages are cached, the secret scanning begins.
+Once the pages are cached, the secret scanning begins.
 
-```
+```bash
 ...
 2024/10/31 06:28:01 Searching for secrets in: https://0x4f.in//assets/js/security.js (cached at: .urlCache/bf212e67.cache)
 2024/10/31 06:28:02 
 ---
 
 SECRET DETECTED:
-        - Type: OpenAI Service API Key
-        - Variable Name: openAiApiKey
-        - Value: sk-proj-█████████████████████████████████████████████
-        - Tags: ["regexMatched","providerDetected","longString"]
-        - Tsallis Entropy: 0.979678
+    - Type: OpenAI Service API Key
+    - Variable Name: openAiApiKey
+    - Value: sk-proj-█████████████████████████████████████████████
+    - Position: 24:29
+    - Source: https://0x4f.in/assets/js/security.js
+    - Cached Location: .urlCache/0918b0a2.cache
+    - Tags: ["regexMatched","providerDetected","longString"]
+    - Tsallis Entropy: 0.979253
+
+DOMAINS FOUND:
+    - 1. 0x4f.in
+    - 2. github.com
+
+URLs FOUND:
+    - 1. https://github.com/payloadbox/xss-payload-list
+    - 2. https://0x4f.in/assets/images/ryanbeckford.gif
 ...
 ```
 
 And thus, the secret is caught.
 
-### Modules
+#### Stolen API Keys from phishing websites (Phishtank module)
+
+Running secretsnitch with the following command:
+
+```bash
+go build
+./secretsnitch --phishtank
+```
+
+Grabs the latest URL archive from the Phishtank API. It then begins downloading and scraping all the pages from Phishtank first, post which the secret analysis begins.
+
+### Components
+
+#### Basic flow
 
 reserved
 
-### Caching
+#### Modules
 
-reserved
+- **github**: Scan public GitHub commits from the past hour
+  - (optional) **from**: Timestamp to start from (format: 2006-01-02-15)
+  - (optional) **to**:   Timestamp to stop at (format: 2006-01-02-15)
+- **github-gists**:      Scan the last 100 public GitHub Gists
+- **gitlab**:            Scan the last 100 public GitLab commits
+- **phishtank**:         Scan reported phishtank.org URLs from the past day
+- **url**:  A single URL to scan. *Tip: some URLs use client-side Javascript rendering (CSR). Use the `--selenium` flag to beat this and scraped rendered pages.*
+- **urlList**:           A line-separated file containing a list of URLs to scan for secrets
+- **directory**:         Scan an entire directory. *Tip: if you're bored waiting for pages to finish scraping, you can simply terminate the program and run it with `--directory=.urlCache/`* ;)
+- **file**:              Scan a single file
+
+#### Caching
+
+This tool supports caching in order to save you some time. When a single URL or a list of URLs is supplied to the tool, each URL is sent to a worker. Each worker then scrapes and logs it to a patch file stored in `.urlCache/`. The named of each file is an MD5 hash of the URL in a primary-key like fashion, to make it easy to store, retrieve and detect the presence of pre-cached files without using a database.
+
+<img src = "media/secretsnitch_caching.drawio.png" alt = "Caching workflow">
 
 
-### Tunables
+This is quite useful in several scenarios, such as when starts are restarted with reduced workers if the tool crashes, or if the tool is restarted due to rate-limits being indefinite.
+
+Although sometimes, this caching feature can interfere with your use of this tool, for example, while bounty hunting. To fix this, simply delete the `.urlCache/` directory and start the tool again.
+
+#### Tunables
 
 Secretsnitch is extremely tunable via for different use cases, whether its the worker count to prevent slowdowns on older devices, or the output destination for logshipping via tools like Filebeat.
 
 Tunables available:
 
-- output: Save scan output to a custom location. Directories and subdirectories will be created if they don't exist.
+- **output**: Save scan output to a custom location. Directories and subdirectories will be created if they don't exist.
 
-- workers: The amount of workers that can run each operation concurrently. This should be set according to hardware factors like CPU threads, rate-limits etc. When you're bruteforcing a large list of URLs or a directory on a powerful server, set this number to a high number.
+- **workers**: The amount of workers that can run each operation concurrently. This should be set according to hardware factors like CPU threads, rate-limits etc. When you're bruteforcing a large list of URLs or a directory on a powerful server, set this number to a high number.
 
-- recursions: Crawl URLs inside files, then crawl the URLs inside those URLs, then the URLs in the URLs in the URLs, then the URLs in the URLs in the URLs in the URLs, then... you get the point.
+- **recursions**: Crawl URLs inside files, then crawl the URLs inside those URLs, then the URLs in the URLs in the URLs, then the URLs in the URLs in the URLs in the URLs, then... you get the point.
 
-- retries: Give up after trying so many times. Useful if the destination is misbehaving or crashing.
+- **retries**: Give up after trying so many times. Useful if the destination is misbehaving or crashing.
 
-- secrets-optional: Display other data such as URLs and domains even if there are no secrets. Useful for asset extraction.
+- **secrets-optional**: Display other data such as URLs and domains even if there are no secrets. Useful for asset extraction.
 
-- selenium: If a site uses client-side rendering (CSR), you can use the Selenium plugin to have the Javascript be rendered first, then extract secrets from it. Please note that Docker needs to be installed for this to work.
+- **selenium**: If a site uses client-side rendering (CSR), you can use the Selenium plugin to have the Javascript be rendered first, then extract secrets from it. Please note that Docker needs to be installed for this to work.
 
-### Scanning
+#### Scanning
 
-reserved
+
 
 #### Tokenization
 
@@ -127,18 +245,21 @@ reserved
 
 When a file containing code is passed to the tool, it uses tokenization techniques via in-built regular expressions, string splitting and so on. 
 
-These techniques are tested and optimized for languages commonly used with backend development such as - Javascript, 
-- Golang, 
-- Bash, 
-- Python, 
-- Java 
-- etc. 
+These techniques are tested and optimized for languages commonly used with backend development such as
 
-There is also support for common structured file formats such as 
-- JSON, 
-- env, 
-- XML, 
-- HTML,
+- Javascript
+- Golang
+- Bash
+- Python
+- Java
+- etc.
+
+There is also support for common structured file formats such as
+
+- JSON
+- env
+- XML
+- HTML
 - etc.
 
 #### Parsing
@@ -155,22 +276,41 @@ Secretsnitch looks for two classifications of secrets:
 2. Secret files: These include
     - SSH Private Keys
     - `.pem` files
+  
+In addition to the above, the tool also looks for other assets that could work in conjunction with the secrets. This includes
 
-### Detection
+- URLs: These may be URLs for things like S3 storage, documentation, or may contain PII.
 
-reserved
+- Domains These are domains that the tool captures and validates with the system's DNS resolvers. This is especially useful for correlating secrets with a particular organization.
 
-### Contribution
+#### Detection
 
-reserved
+Detection uses two signature files supplied with the tool.
 
-### Metadata
+- `signatures.yaml`
+This file contains a list of regular expressions that the tool uses to catch secrets. They are sorted by the service provider (Amazon, Microsoft etc.) and the service they provide (e.g.: SQS, SharePoint etc.)
 
-reserved
+    It contains two classifications of regular expressions:
+
+  - Variable patterns: These are patterns that are used to check for variable names where the secret may not have a recognizable pattern, for example, passwords. These are marked by the usage of the word `Variable` at the end of the signature key.
+
+  - Secret patterns: these are patterns that are commonly used by secrets, for example, `AIza...` for GCP keys, `AKIA` for AWS keys and so on.
+
+- `blacklist.yaml`
+This file contains a list of blacklist patterns that are skipped. These include things like blob data patterns for images and audio, certain placeholderstrings etc.
+
+These files are parsed, then the compiled patterns are matched against variable names and values using Golang's `regexp` library in a loop. The result from the `FindSecrets()` function is returned as a slice of `ToolData` and is logged immediately.
+
+
+#### Contribution
+
+Want to contribute? Please read the [contributing documentation](contributing.md).
 
 ## Troubleshooting and tips
 
-### URL Cache contains data that's too old.
+### URL Cache contains data that's too old
+
+Sometimes, caching can interfere with your use of this tool with outdated or inaccurate data. To fix this, simply delete the `.urlCache/` directory and start the tool again.
 
 ### GitHub rate limits
 
@@ -184,13 +324,13 @@ Sometimes, the tool just stops as soon as it is started. This is due to a bug wi
 
 If you receive a message like the one below on Linux
 
-```
+```bash
 Error creating container: Post "http://unix.sock/containers/create?": dial unix /var/run/docker.sock: connect: permission denied
 ```
 
 Simply run
 
-```
+```bash
 sudo usermod -aG docker $USER
 newgrp docker
 ```
@@ -209,6 +349,18 @@ For Windows, try the following
 
 If you can successfully build the docker image manually but can't trigger it via secretsnitch, try running the tool as superuser via `sudo`.
 
----
+## Acknowledgements
 
-Copyright (c) 2024 Owais Shaikh (https://0x4f.in)
+- [GitGuardian](https://docs.gitguardian.com/secrets-detection/secrets-detection-engine/detectors/supported_credentials), for their extensive regular expressions list. Can't thank them enough for kickstarting this.
+- [GitSecrets](https://github.com/awslabs/git-secrets)
+- [Secretsearch](https://gitlab.com/redhuntlabs/secretsearch), the predecessor of this project. I do not maintain it anymore.
+
+## License
+
+Multimedia licensed under [![License: CC BY-NC-SA 4.0](https://licensebuttons.net/l/by-nc-sa/4.0/80x15.png)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
+
+[Copyright © 2024 Owais Shaikh](LICENSE)
+
+## Donate
+
+If you'd like to donate to me, [visit my GitHub page](https://github.com/0x4f53). It incentivizes me to develop more
