@@ -7,7 +7,7 @@
   - S3 Private Key Variable: (?i)AWS_S3_PRIVATE_KEY|s3_key|S3_PRIVATE_KEY
   - SNS Confirmation Token: (?i)SubscribeURL":"https:\/\/sns\.[a-z0-9-]+\.amazonaws\.com\/?Action=ConfirmSubscription&Token=[a-zA-Z0-9-=_]+
   - SES SMTP Password Variable: (?i)ses_smtp_password
-  - AWS Private Key Variable: (?i)?:ec2\-private\-key|EC2_PRIVATE_KEY
+  - AWS Private Key Variable: (?i)ec2\-private\-key|EC2_PRIVATE_KEY
   - MWS Token: (amzn\.mws\.[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})
   - AppSync GraphQL Key: \bda2-[a-z0-9]{26}
 
