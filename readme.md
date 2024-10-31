@@ -14,15 +14,15 @@ A lightning-fast, modular secret scanner and endpoint extractor in Golang!
 
 <img src = "media/terminal.gif" alt = "Secretsnitch logo" width = "600dp">
 
-- **Concurrent scanning**: fast and efficient scanning with thousands of Goroutines at once
+- **Concurrent scanning**: fast and efficient scanning with thousands of Goroutines - at once!
 
-- **Modular design**: Supports GitHub, GitLab, Phishtank and random web scraping via flags
+- **Modular design**: Supports GitHub, GitLab, Phishtank and random web scraping via flags.
 
-- **Efficient networking**: reduced network usage with caching and instant output logging
+- **Efficient networking**: reduced network usage with caching and instant output logging.
 
-- **Comprehensive checks**: huge signature list for variable names, secret strings etc combined with metadata and entropy scoring
+- **Comprehensive checks**: huge signature list for variable names, secret strings etc combined with metadata and entropy scoring.
 
-- **User-friendly**: Designed for ease of use by pentesters, bounty hunters, or enterprise users via simple command-line execution
+- **User-friendly**: Designed for ease of use by pentesters, bounty hunters, or enterprise users via simple command-line execution.
 
 - **Community-driven**: sourced from Google searches, ChatGPT, and open-source lists like GitGuardian.
 
