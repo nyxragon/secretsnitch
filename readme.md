@@ -1,5 +1,5 @@
 [![Golang](https://img.shields.io/badge/Golang-eee.svg?style=flat-square&logo=go)](https://go.dev)
-[![License](https://img.shields.io/badge/License-GPLv3-purple?style=flat-square&logo=libreoffice)](LICENSE)
+[![License](https://img.shields.io/badge/License-MIT-purple?style=flat-square&logo=libreoffice)](LICENSE)
 [![Latest Version](https://img.shields.io/github/v/tag/0x4f53/secretsnitch?label=Version&style=flat-square&logo=semver)](https://github.com/0x4f53/secretsnitch/releases)
 
 Presented at 
