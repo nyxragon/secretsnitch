@@ -285,6 +285,11 @@ SECRET DETECTED:
 
 								if !containsSecret(secrets, secret) {
 									secrets = append(secrets, secret)
+
+									if (*secretsOptional && len(output.CapturedDomains) > 0) || output.Secret.Secret != "" {
+										logSecret(output, outputFile)
+									}
+
 								}
 
 								mu.Unlock()
@@ -304,12 +309,6 @@ SECRET DETECTED:
 	wg.Wait()
 
 	return output
-}
-
-func logSecret(secret ToolData, outputFile *string) {
-	unindented, _ := json.Marshal(secret)
-	// indented, _ := json.MarshalIndent(secrets, "", "	")
-	appendToFile(*outputFile, string(unindented))
 }
 
 func ScanFiles(files []string) {
@@ -353,11 +352,7 @@ func scanFile(filePath string, wg *sync.WaitGroup) {
 		log.Printf("Searching for secrets in: %s", filePath)
 	}
 
-	output := FindSecrets(text)
-
-	if (*secretsOptional && len(output.CapturedDomains) > 0) || output.Secret.Secret != "" {
-		logSecret(output, outputFile)
-	}
+	FindSecrets(text)
 
 	if *maxRecursions > 0 {
 		recursionCount++

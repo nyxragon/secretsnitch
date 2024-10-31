@@ -9,6 +9,7 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -121,4 +122,10 @@ func appendToFile(filePath string, text string) error {
 	}
 
 	return nil
+}
+
+func logSecret(secret ToolData, outputFile *string) {
+	unindented, _ := json.Marshal(secret)
+	// indented, _ := json.MarshalIndent(secrets, "", "	")
+	appendToFile(*outputFile, string(unindented))
 }
