@@ -39,6 +39,7 @@
   - Account SID: \bAC[a-zA-Z0-9_\-]{32}\b
   - App SID: \bAP[a-zA-Z0-9_\-]{32}\b
   - API Key: \bSK[0-9a-fA-F]{32}\b
+  - Access Token: \b(?i)55[0-9a-fA-F]{32}\b
 
 - Atlassian: 
   - JIRA Token: (?i)(?:jira)[^{}()<>?*&:%@!\/= \n]{0,20}[\"\'`]?\s{0,50}\b(?::|=>|=|,)\s{0,50}[\"\'`]?([a-zA-Z-0-9]{24})
