@@ -334,7 +334,7 @@ func scanFile(filePath string, wg *sync.WaitGroup) {
 
 	sourceUrl := grabSourceUrl(text)
 	if sourceUrl != "" {
-		log.Printf("Searching for secrets in: %s (cached at: %s)", sourceUrl, filePath)
+		log.Printf("Searching for secrets in: %s (cached at: %s)", sourceUrl, makeCacheFilename(sourceUrl))
 	} else {
 		log.Printf("Searching for secrets in: %s", filePath)
 	}

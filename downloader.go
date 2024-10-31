@@ -95,7 +95,7 @@ func fetchFromUrlList(urls []string) []string {
 		if !fileExists(makeCacheFilename(url)) {
 			processedUrls = append(processedUrls, url)
 		} else {
-			log.Printf("Skipping %s as it is already cached", url)
+			log.Printf("Skipping %s as it is already cached at %s", url, makeCacheFilename(url))
 			successfulDownloads = append(successfulDownloads, makeCacheFilename(url))
 		}
 	}
