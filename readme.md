@@ -31,6 +31,8 @@ A lightning-fast, modular secret scanner and endpoint extractor in Golang!
 ## Usage
 
 ```bash
+
+❯ go build
 ❯ ./secretsnitch -h⠀⠀
 
 Secretsnitch - A lightning-fast secret scanner in Golang!
@@ -183,7 +185,6 @@ And thus, the secret is caught.
 Running secretsnitch with the following command:
 
 ```bash
-go build
 ./secretsnitch --phishtank
 ```
 
@@ -209,6 +210,14 @@ The basic operation of the tool is as follows
 - **urlList**:           A line-separated file containing a list of URLs to scan for secrets
 - **directory**:         Scan an entire directory. *Tip: if you're bored waiting for pages to finish scraping, you can simply terminate the program and run it with `--directory=.urlCache/`* ;)
 - **file**:              Scan a single file
+
+You can also import the secretsnitch scanner as a golang package within your own security tools.
+
+To do this, simply open your Go project and type
+
+```bash
+go get -u github.com/0x4f53/secretsnitch
+```
 
 #### Caching
 
@@ -309,7 +318,7 @@ These files are parsed, then the compiled patterns are matched against variable 
 
 ### False positives and false negatives
 
-Some false positive secrets simply cannot be mitigated. Others, however, can be improved through continuous improvement of the signatures list and the algorithms. False negatives meay also occur if the secret patterns are too strict. 
+Some false positive secrets simply cannot be mitigated. Others, however, can be improved through continuous improvement of the signatures list and the algorithms. False negatives may also occur if the secret patterns are too strict. 
 
 If you have any ideas to prevent false positives and false negatives, please [raise an issue](https://github.com/0x4f53/secretsnitch/issues) or [contribute](contributing.md) to the project.
 
@@ -319,7 +328,7 @@ Sometimes, caching can interfere with your use of this tool with outdated or ina
 
 ### GitHub rate limits
 
-If your worker count is above GitHub's permitted public API limits, blasting multiple queries will result in an error `429` and a rate-limit. To prevent this, simply set the `workers` flag to 100 or a lower number. This trick also works with the URL list option if the source URLs have rate-limiting enable.d
+If your worker count is above GitHub's permitted public API limits, blasting multiple queries will result in an error `429` and a rate-limit. To prevent this, simply set the `workers` flag to 100 or a lower number. This trick also works with the URL list option if the source URLs have rate-limiting enabled.
 
 ### Tool stops instantly
 
@@ -372,4 +381,4 @@ Multimedia licensed under [![License: CC BY-NC-SA 4.0](https://licensebuttons.ne
 
 ## Donate
 
-If you'd like to donate to me, [visit my GitHub page](https://github.com/0x4f53). It incentivizes me to develop more
+If you'd like to donate to me, [visit my GitHub page](https://github.com/0x4f53). It incentivizes me to develop more.
