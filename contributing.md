@@ -1,8 +1,8 @@
 # Contributing
 
-Thank you for taking the valuable time to commit to secretsnitch. Let's get started.
+Thank you for taking your time to contribute to secretsnitch. Let's get started.
 
-YAMLs were a conscious design decision I made. In addition to looking pretty, they help me quickly comment out secrets or write comments explaining certain regular expression (regex) patterns. This is why maintaining the signatures is so easy.
+YAML file signatures were a conscious design decision I made. In addition to looking pretty, they help me quickly comment out secrets or write comments explaining certain regular expression (regex) patterns. This is why maintaining the signatures is so easy.
 
 ### Adding new signatures to `signatures.yaml`
 
@@ -34,9 +34,9 @@ For example, `AIza...` for GCP keys, `AKIA` for AWS keys and so on.
 The format to be followed is as follows
 
 ```yaml
-- <regex 1>
-- <regex 2>
-- <regex 3>
+- <regex 1> # e.g.: data:image/
+- <regex 2> # e.g.: sha(1|256|512)-
+- <regex 3> # e.g.: ----- BEGIN OPENPGP PUBLIC KEY -----
 ```
 
 Since the blacklist is also regex compatible, you can also specify patterns that blacklisted entries may follow. For example, `$YOUR_[\w]_KEY` is a good example of a blacklist pattern that will ignore variable substitutions in several shell scripts.
@@ -51,4 +51,4 @@ Then fork this tool and simply call the appropriate functions (such as `fetchFro
 
 ### Changes in logic
 
-This tool has a few bugs. Please feel free to submit a PR quashing them and I'll merge it happily.
+This tool has a few bugs. Please feel free to submit a pull request them and I'll merge it happily.
