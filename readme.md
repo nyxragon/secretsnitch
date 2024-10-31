@@ -12,6 +12,8 @@ Presented at
 
 A lightning-fast, modular secret scanner and endpoint extractor in Golang!
 
+<img src = "media/terminal.gif" alt = "Secretsnitch logo" width = "600dp">
+
 - **Concurrent scanning**: fast and efficient scanning with thousands of Goroutines at once
 
 - **Modular design**: Supports GitHub, GitLab, Phishtank and random web scraping via flags
@@ -101,6 +103,20 @@ JSON file .githubCommits//2024-10-31-13.json already exists. Continuing...
 2024/10/31 20:31:40 Skipping https://github.com/omarzydan610/Calculator_React-SpringBoot/commit/6b26bcd9f9e926dc5cc03cbd7f5cab01b966bced.patch as it is already cached at .urlCache/156e201d.cache
 ...
 
+2024/10/31 20:32:30 
+---
+
+SECRET DETECTED:
+    - Type:            Generic Password Variable
+    - Variable Name:   password
+    - Value:           Tes█████████
+    - Position:        26:27
+    - Source:          https://github.com/kal█████████████████████████████████████████████a8f37b12b061db16f5a13e.patch
+    - Cached Location: .urlCache/674d3824.cache
+    - Tags:            ["regexMatched"]
+    - Tsallis Entropy: 0.843750
+2024/10/31 20:32:30 Searching for secrets in: https://github.com/aaron-hwang/SRL/commit/d1e34fad5b7bdda6498ec5b6654323cbb0754c1a.patch (cached at: .urlCache/def4ec10.cache)
+...
 ```
 
 If you want to run the scan on just the last hour, simply run the command without the `from` and `to` flags.
@@ -130,20 +146,6 @@ This gives you the following output:
 2024/10/31 06:25:50 Content from https://0x4f.in//assets/js/security.js saved to .urlCache/
 2024/10/31 06:25:50 Content from https://play.google.com/store/apps/details?id=zeroxfourf.wristkey saved to .urlCache/
 ...
-
-2024/10/31 20:32:30 
----
-
-SECRET DETECTED:
-    - Type:            Generic Password Variable
-    - Variable Name:   password
-    - Value:           Tes█████████
-    - Position:        26:27
-    - Source:          https://github.com/kal█████████████████████████████████████████████a8f37b12b061db16f5a13e.patch
-    - Cached Location: .urlCache/674d3824.cache
-    - Tags:            ["regexMatched"]
-    - Tsallis Entropy: 0.843750
-2024/10/31 20:32:30 Searching for secrets in: https://github.com/aaron-hwang/SRL/commit/d1e34fad5b7bdda6498ec5b6654323cbb0754c1a.patch (cached at: .urlCache/def4ec10.cache)
 ```
 
 Once the pages are cached, the secret scanning begins.
