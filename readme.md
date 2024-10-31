@@ -305,6 +305,12 @@ These files are parsed, then the compiled patterns are matched against variable 
 
 ## Troubleshooting and tips
 
+### False positives and false negatives
+
+Some false positive secrets simply cannot be mitigated. Others, however, can be improved through continuous improvement of the signatures list and the algorithms. False negatives meay also occur if the secret patterns are too strict. 
+
+If you have any ideas to prevent false positives and false negatives, please [raise an issue](https://github.com/0x4f53/secretsnitch/issues) or [contribute](contributing.md) to the project.
+
 ### URL Cache contains data that's too old
 
 Sometimes, caching can interfere with your use of this tool with outdated or inaccurate data. To fix this, simply delete the `.urlCache/` directory and start the tool again.
