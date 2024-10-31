@@ -258,7 +258,7 @@ Tunables available:
 
 When a file containing code is passed to the tool, it uses tokenization techniques via in-built regular expressions, string splitting and so on. 
 
-These techniques are tested and optimized for languages commonly used with backend development such as
+These techniques are tested and optimized for codebases of languages commonly used with backend development, such as
 
 - Javascript
 - Golang
