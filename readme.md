@@ -256,13 +256,11 @@ Tunables available:
 
 #### Scanning
 
-
-
 #### Tokenization
 
 <img src = "media/secretsnitch_tokenizer.drawio.png" alt = "Tokenizer workflow">
 
-When a file containing code is passed to the tool, it uses tokenization techniques via in-built regular expressions, string splitting and so on. 
+When a file containing code is passed to the tool, it uses tokenization techniques via in-built regular expressions, string splitting and so on.
 
 These techniques are tested and optimized for codebases of languages commonly used with backend development, such as
 
@@ -303,6 +301,8 @@ In addition to the above, the tool also looks for other assets that could work i
 - Domains These are domains that the tool captures and validates with the system's DNS resolvers. This is especially useful for correlating secrets with a particular organization.
 
 #### Detection
+
+<img src = "media/sigs_screenshot.png" alt = "Signatures">
 
 Detection uses two signature files supplied with the tool.
 
