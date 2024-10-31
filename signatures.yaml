@@ -176,7 +176,9 @@
 #  - API Key: (?i)(?:shodan)[^{}]{0,20}( ){0,1}[=:]( ){0,1}([a-zA-Z0-9]{32})
 
 - OpenAI:
-  - API Key: (?i)(sk-[a-zA-Z0-9]{20}T3BlbkFJ[a-zA-Z0-9]{20})
+  - Service API Key: (?i)sk-.+-[A-Za-z0-9].+T3BlbkFJ[A-Za-z0-9].+
+  - User API Key: (?i)sk-[A-Za-z0-9].+T3BlbkFJ[A-Za-z0-9].+
+  - Project API Key: (?i)sk-proj-[A-Za-z0-9].+T3BlbkFJ[A-Za-z0-9].+
   - API Key Variable: (?i)openai_api_key
 
 - OpenWeatherMap:
