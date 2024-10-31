@@ -81,11 +81,11 @@ pflag: help requested
 
 #### All GitHub commits in a range (GitHub module)
 
+The GitHub module lets you search for secrets based on a commit timestamp. It generates patch files from a dataset that Gharchive hosts, then tries scraping those links.
+
 GitHub uses something called "patch" files to keep track of changes that are made to repositories. These days, git has an in-built integration to prevent secret exposures. However, several secrets still slip by and some archived commits from the past may still contain secrets.
 
 Lets say you would like to scan for commits from January 10, 2023 at 3 PM to January 15 2023 at 12 AM. You can run the below command
-
-The GitHub module lets you search for secrets based on a commit timestamp. It generates patch files from a dataset that Gharchive hosts, then tries scraping those links.
 
 ```bash
 ./secretsnitch --github --from=2024-01-10-15 --to=2024-01-15-0 --workers=100
