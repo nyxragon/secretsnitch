@@ -22,6 +22,7 @@ type SecretData struct {
 	Variable       string
 	Secret         string
 	TsallisEntropy float64
+	Position       string
 	Tags           []string
 }
 
@@ -130,6 +131,7 @@ func FindSecrets(text string) ToolData {
 	var mu sync.Mutex
 	var wg sync.WaitGroup
 
+	originalText := text
 	sourceUrl := grabSourceUrl(text)
 
 	// Secret collection
@@ -221,6 +223,9 @@ func FindSecrets(text string) ToolData {
 								variable.Value = variableValueMatch[0]
 							}
 
+							row, column := findPosition(originalText, variable.Value)
+							position := strconv.Itoa(row) + ":" + strconv.Itoa(column)
+
 							if len(variable.Value) >= 8 {
 								mu.Lock()
 
@@ -229,8 +234,19 @@ func FindSecrets(text string) ToolData {
 									ServiceName:    service,
 									Variable:       variable.Name,
 									Secret:         variable.Value,
+									Position:       position,
 									TsallisEntropy: entropy,
 									Tags:           tags,
+								}
+
+								output = ToolData{
+									Tool:            "secretsnitch",
+									ScanTimestamp:   time.Now().UTC().Format("2006-01-02T15:04:05.000Z07:00"),
+									SourceUrl:       sourceUrl,
+									Secret:          secret,
+									CacheFile:       makeCacheFilename(sourceUrl),
+									CapturedDomains: domains,
+									CapturedURLs:    capturedURLs,
 								}
 
 								fmt.Printf("\nDOMAINS FOUND:\n")
@@ -246,22 +262,26 @@ func FindSecrets(text string) ToolData {
 
 								tagBytes, _ := json.Marshal(tags)
 								log.Println("\n---")
-								fmt.Printf("\nSECRET DETECTED:\n\t- Type: %s\n\t- Variable Name: %s\n\t- Value: %s\n\t- Tags: %s\n\t- Tsallis Entropy: %f\n",
+								fmt.Printf(`
+SECRET DETECTED:
+    - Type:            %s
+    - Variable Name:   %s
+    - Value:           %s
+    - Position:        %s
+    - Source:          %s
+    - Cached Location: %s
+    - Tags:            %s
+    - Tsallis Entropy: %f
+`,
 									provider.Name+" "+service,
 									variable.Name,
 									variable.Value,
+									output.Secret.Position,
+									output.SourceUrl,
+									output.CacheFile,
 									string(tagBytes),
-									entropy)
-
-								output = ToolData{
-									Tool:            "secretsnitch",
-									ScanTimestamp:   time.Now().UTC().Format("2006-01-02T15:04:05.000Z07:00"),
-									SourceUrl:       sourceUrl,
-									Secret:          secret,
-									CacheFile:       makeCacheFilename(sourceUrl),
-									CapturedDomains: domains,
-									CapturedURLs:    capturedURLs,
-								}
+									entropy,
+								)
 
 								if !containsSecret(secrets, secret) {
 									secrets = append(secrets, secret)
@@ -349,4 +369,17 @@ func scanFile(filePath string, wg *sync.WaitGroup) {
 		}
 	}
 
+}
+
+func findPosition(text, substring string) (line, column int) {
+	lines := strings.Split(text, "\n")
+
+	for i, lineText := range lines {
+		col := strings.Index(lineText, substring)
+		if col != -1 {
+			return i + 1, col + 1
+		}
+	}
+
+	return -1, -1
 }
