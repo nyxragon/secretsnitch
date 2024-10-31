@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"strings"
 
 	githubPatches "github.com/0x4f53/github-patches"
 	gitlabPatches "github.com/0x4f53/gitlab-patches"
@@ -32,6 +33,9 @@ func main() {
 	}
 
 	if *URL != "" {
+		if !strings.Contains(*URL, "http://") || !strings.Contains(*URL, "https://") {
+			log.Fatalf("Please enter a valid URL!")
+		}
 		var successfulUrls []string
 		if *selenium {
 			if !checkDockerInstalled() {
