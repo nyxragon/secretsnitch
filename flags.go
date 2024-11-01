@@ -48,6 +48,9 @@ var (
 
 	// Use selenium via Docker
 	selenium *bool
+
+	// Maximimum file size to scan for secrets
+	maxFileSize = 20 * 1024 * 1024
 )
 
 func logo() {

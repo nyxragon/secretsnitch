@@ -28,7 +28,7 @@ var (
 	}
 )
 
-func scrapeURL(url string) {
+func scrapeURL(url string, immediateScan bool) {
 	var retryCount int
 	cacheFileName := makeCacheFilename(url)
 
@@ -65,7 +65,14 @@ func scrapeURL(url string) {
 						log.Printf("Failed to write response body to file: %s\n", err)
 					} else {
 						log.Printf("Content from %s saved to %s\n", url, cacheFileName)
+
+						if immediateScan {
+							log.Printf("Scanning file %s for secrets", cacheFileName)
+							FindSecrets(responseString)
+						}
+						
 					}
+
 				}
 				break
 			} else {
@@ -92,8 +99,10 @@ func fetchFromUrlList(urls []string) []string {
 
 	var toDownload []string
 
+	schemeRe := regexp.MustCompile(`^https?://`)
+
 	for _, url := range urls {
-		validUrl, _ := regexp.MatchString(`^https?://`, url)
+		validUrl := schemeRe.MatchString(url)
 		if !validUrl {
 			log.Println("Please enter a valid URL starting with http / https.")
 			os.Exit(-1)
@@ -110,7 +119,7 @@ func fetchFromUrlList(urls []string) []string {
 			for url := range urlChan {
 				wg.Add(1)
 				defer wg.Done()
-				scrapeURL(url)
+				scrapeURL(url, true)
 			}
 		}()
 	}

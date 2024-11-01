@@ -164,7 +164,7 @@ func FindSecrets(text string) ToolData {
 	splitText = append(splitText, strings.Split(text, ";")...)
 	splitText = append(splitText, strings.Split(text, "\n")...)
 	splitText = removeDuplicates(splitText)
-	log.Println("Scanning " + strconv.Itoa(len(splitText)) + " tokens for secrets")
+	// log.Println("Scanning " + strconv.Itoa(len(splitText)) + " tokens for secrets")
 
 	// Channel for controlling the number of workers
 	workerLimit := make(chan struct{}, *maxWorkers)
@@ -350,6 +350,11 @@ func scanFile(filePath string, wg *sync.WaitGroup) {
 		log.Printf("Searching for secrets in: %s (cached at: %s)", sourceUrl, makeCacheFilename(sourceUrl))
 	} else {
 		log.Printf("Searching for secrets in: %s", filePath)
+	}
+
+	if len(text) >= maxFileSize {
+		log.Printf("Skipping this file as it is >= %d MB (%d MB)", maxFileSize/1024/1024, len(text)/1024/1024)
+		return
 	}
 
 	FindSecrets(text)
