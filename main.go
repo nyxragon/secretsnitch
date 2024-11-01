@@ -38,8 +38,11 @@ func main() {
 				log.Fatalf("Please install Docker to use Selenium mode!")
 			}
 			if !checkImageBuilt() {
-				log.Fatalf("Attempting to build Selenium testing image from Dockerfile...")
-				exec.Command("docker", "build", "-t", "selenium-integration", ".")
+				log.Println("Attempting to build Selenium testing image from Dockerfile...")
+				err := exec.Command("docker", "build", "-t", "selenium-integration", ".").Run()
+				if err != nil {
+					log.Fatalf("Failed to build Docker image: %v", err)
+				}
 			}
 			successfulUrls = []string{scrapeWithSelenium(*URL)}
 		} else {
@@ -50,7 +53,10 @@ func main() {
 	}
 
 	if *directory != "" {
-		files, _ := getAllFiles(*directory)
+		files, err := getAllFiles(*directory)
+		if err != nil {
+			log.Fatalf("Error getting files from directory: %v", err)
+		}
 		ScanFiles(files)
 		return
 	}
@@ -62,12 +68,19 @@ func main() {
 
 	if *github {
 		githubPatches.GetCommitsInRange(githubPatches.GithubCacheDir, *from, *to, false)
-		chunks, _ := listFiles(githubPatches.GithubCacheDir)
+		chunks, err := listFiles(githubPatches.GithubCacheDir)
+		if err != nil {
+			log.Fatalf("Error listing GitHub cache files: %v", err)
+		}
 
 		var patches []string
 
 		for _, chunk := range chunks {
-			events, _ := githubPatches.ParseGitHubCommits(githubPatches.GithubCacheDir + chunk)
+			events, err := githubPatches.ParseGitHubCommits(githubPatches.GithubCacheDir + chunk)
+			if err != nil {
+				log.Printf("Error parsing GitHub commits from %s: %v", chunk, err)
+				continue
+			}
 
 			for _, event := range events {
 				for _, commit := range event.Payload.Commits {
@@ -79,7 +92,7 @@ func main() {
 
 		successfulUrls := fetchFromUrlList(patches)
 		ScanFiles(successfulUrls)
-		os.RemoveAll(githubPatches.GithubCacheDir)
+		defer os.RemoveAll(githubPatches.GithubCacheDir)
 		return
 	}
 
@@ -93,13 +106,16 @@ func main() {
 
 		successfulUrls := fetchFromUrlList(patches)
 		ScanFiles(successfulUrls)
-		os.RemoveAll(gitlabPatches.GitlabCacheDir)
+		defer os.RemoveAll(gitlabPatches.GitlabCacheDir)
 		return
 	}
 
 	if *githubGists {
 		gistData := githubPatches.GetLast100Gists()
-		parsedGists, _ := githubPatches.ParseGistData(gistData)
+		parsedGists, err := githubPatches.ParseGistData(gistData)
+		if err != nil {
+			log.Fatalf("Error parsing GitHub gists: %v", err)
+		}
 
 		var gists []string
 		for _, gist := range parsedGists {
@@ -113,7 +129,10 @@ func main() {
 
 	if *phishtank {
 		savePhishtankDataset()
-		urls, _ := readLines(phishtankURLCache)
+		urls, err := readLines(phishtankURLCache)
+		if err != nil {
+			log.Fatalf("Error reading phishtank URLs: %v", err)
+		}
 		successfulUrls := fetchFromUrlList(urls)
 		ScanFiles(successfulUrls)
 		return
