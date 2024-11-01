@@ -10,9 +10,11 @@ Presented at
 
 # Secretsnitch
 
-A lightning-fast, modular secret scanner and endpoint extractor in Golang!
+A fast continuous secret scanner and endpoint extractor in Golang!
 
 <img src = "media/terminal.gif" alt = "Secretsnitch logo" width = "600dp">
+
+*(note: all the secrets in this document are censored since they're real*)
 
 - **Continous scanning**: non-stop enumeration of scanning from several sources, helping organizations catch and secure accidental secret exposures. 
 
