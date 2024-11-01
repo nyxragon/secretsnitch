@@ -33,7 +33,7 @@ func main() {
 	}
 
 	if *URL != "" {
-		if !strings.Contains(*URL, "http://") || !strings.Contains(*URL, "https://") {
+		if !strings.HasPrefix(*URL, "http://") && !strings.HasPrefix(*URL, "https://") {
 			log.Fatalf("Please enter a valid URL!")
 		}
 		var successfulUrls []string
