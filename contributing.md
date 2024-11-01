@@ -18,7 +18,7 @@ The format to be followed is as follows
     - XYZ Variable: <regex> # A variable pattern, such as OPENAI_API_KEY
 ```
 
-The services consist of two classifications
+There are two types of signatures 
 
 - Variable name patterns: These are denoted by the use of the word "Variable" in their key. These for variable names in code, where the secret may not have a recognizable pattern, but the name of the variable generally follows a pattern.
 For example, passwords are random, but their field tends to be named "password" in most instances. Therefore, this is a Generic password variable pattern.
@@ -51,4 +51,4 @@ Then fork this tool and simply call the appropriate functions (such as `fetchFro
 
 ### Changes in logic
 
-This tool has a few bugs. Please feel free to submit a pull request them and I'll merge it happily.
+This tool has a few bugs. Please feel free to submit a pull request and I'll merge it happily.
