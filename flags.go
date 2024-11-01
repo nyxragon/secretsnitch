@@ -54,6 +54,7 @@ func logo() {
 	fmt.Println("\nSecretsnitch - A lightning-fast secret scanner in Golang!")
 	fmt.Println("https://github.com/0x4f53/secretsnitch")
 	fmt.Println("Copyright © 2024 Owais Shaikh")
+	fmt.Println()
 }
 
 func customUsage() {

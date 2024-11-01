@@ -12,6 +12,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"regexp"
 	"sync"
 	"time"
 
@@ -92,6 +93,11 @@ func fetchFromUrlList(urls []string) []string {
 	var toDownload []string
 
 	for _, url := range urls {
+		validUrl, _ := regexp.MatchString(`^https?://`, url)
+		if !validUrl {
+			log.Println("Please enter a valid URL starting with http / https.")
+			os.Exit(-1)
+		}
 		if fileExists(makeCacheFilename(url)) {
 			log.Printf("Skipping %s as it is already cached at %s", url, makeCacheFilename(url))
 			continue

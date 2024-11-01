@@ -4,7 +4,6 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	"strings"
 
 	githubPatches "github.com/0x4f53/github-patches"
 	gitlabPatches "github.com/0x4f53/gitlab-patches"
@@ -14,14 +13,14 @@ var signatures []Signature
 
 func main() {
 
+	logo()
+
 	err := makeDir(cacheDir)
 	if err != nil {
 		log.Println(err)
 	}
 
 	setFlags()
-
-	logo()
 
 	signatures = readSignatures()
 
@@ -33,9 +32,6 @@ func main() {
 	}
 
 	if *URL != "" {
-		if !strings.HasPrefix(*URL, "http://") && !strings.HasPrefix(*URL, "https://") {
-			log.Fatalf("Please enter a valid URL!")
-		}
 		var successfulUrls []string
 		if *selenium {
 			if !checkDockerInstalled() {
