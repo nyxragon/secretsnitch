@@ -18,7 +18,7 @@ A fast continuous secret scanner and endpoint extractor in Golang!
 
 - **Continous scanning**: non-stop enumeration of scanning from several sources, helping organizations catch and secure accidental secret exposures. 
 
-- **Concurrent scanning**: fast and efficient scanning with thousands of Goroutines - at once!
+- **Concurrency**: lightning fast scanning with thousands of Goroutines - at once!
 
 - **Modular design**: Supports GitHub, GitLab, Phishtank and random web scraping via flags.
 
