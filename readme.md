@@ -14,6 +14,8 @@ A lightning-fast, modular secret scanner and endpoint extractor in Golang!
 
 <img src = "media/terminal.gif" alt = "Secretsnitch logo" width = "600dp">
 
+- **Continous scanning**: non-stop enumeration of scanning from several sources, helping organizations catch and secure accidental secret exposures. 
+
 - **Concurrent scanning**: fast and efficient scanning with thousands of Goroutines - at once!
 
 - **Modular design**: Supports GitHub, GitLab, Phishtank and random web scraping via flags.
