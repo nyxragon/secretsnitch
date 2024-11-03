@@ -28,7 +28,7 @@ var (
 	}
 )
 
-func scrapeURL(url string, immediateScan bool) {
+func scrapeURL(url string) string {
 	var retryCount int
 	cacheFileName := makeCacheFilename(url)
 
@@ -65,12 +65,7 @@ func scrapeURL(url string, immediateScan bool) {
 						log.Printf("Failed to write response body to file: %s\n", err)
 					} else {
 						log.Printf("Content from %s saved to %s\n", url, cacheFileName)
-
-						if immediateScan {
-							log.Printf("Scanning file %s for secrets", cacheFileName)
-							FindSecrets(responseString)
-						}
-						
+						return responseString
 					}
 
 				}
@@ -90,36 +85,60 @@ func scrapeURL(url string, immediateScan bool) {
 		waitTime := time.Duration(1+rand.Intn(timeoutSeconds)) * time.Second
 		log.Printf("No data received from %s, retrying in %v... (%d/%d)\n", url, waitTime, retryCount, *maxRetries)
 		time.Sleep(waitTime)
+
 	}
+
+	return ""
+
 }
 
-func fetchFromUrlList(urls []string) []string {
-	var wg sync.WaitGroup
+func fetchFromUrlList(urls []string, immediateScan bool) []string {
 	urlChan := make(chan string)
 
 	var toDownload []string
+	var immediateScanList []string
 
 	schemeRe := regexp.MustCompile(`^https?://`)
 
 	for _, url := range urls {
 		validUrl := schemeRe.MatchString(url)
 		if !validUrl {
-			log.Println("Please enter a valid URL starting with http / https.")
-			os.Exit(-1)
-		}
-		if fileExists(makeCacheFilename(url)) {
-			log.Printf("Skipping %s as it is already cached at %s", url, makeCacheFilename(url))
+			log.Printf("Skipping %s as it is not a valid http URL.", url)
 			continue
 		}
+
+		cacheFileName := makeCacheFilename(url)
+
+		if fileExists(cacheFileName) {
+			log.Printf("Not scraping %s as it is already cached at %s", url, cacheFileName)
+			immediateScanList = append(immediateScanList, cacheFileName)
+			continue
+		}
+
 		toDownload = append(toDownload, url)
+
 	}
+
+	if immediateScan {
+		ScanFiles(immediateScanList)
+	}
+
+	var wg sync.WaitGroup
 
 	for i := 0; i < *maxWorkers; i++ {
 		go func() {
 			for url := range urlChan {
 				wg.Add(1)
-				defer wg.Done()
-				scrapeURL(url, true)
+				result := scrapeURL(url)
+
+				if immediateScan && result != "" {
+					cacheFileName := makeCacheFilename(url)
+					log.Printf("Scanning file %s for secrets", cacheFileName)
+					ScanFiles([]string{cacheFileName})
+				}
+
+				wg.Done()
+
 			}
 		}()
 	}
@@ -141,4 +160,5 @@ func fetchFromUrlList(urls []string) []string {
 	}
 
 	return downloadedPaths
+
 }

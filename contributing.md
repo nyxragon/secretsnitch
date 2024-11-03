@@ -25,7 +25,11 @@ For example, passwords are random, but their field tends to be named "password" 
 
 - Secret patterns: these are patterns that are commonly used by secrets. The more specific these are, the fewer false positives they result in.
 For example, `AIza...` for GCP keys, `AKIA` for AWS keys and so on.
-**Do not use the word 'variable' in the key, or it will be picked up as a variable name pattern and the values won't be searched.**
+
+- Block patterns: these are patterns that commonly exist in large blocks of text, for example, private key files.
+For example, `-----BEGIN OPENSSH PRIVATE KEY-----`.
+
+**Do not use the word 'variable' or 'block' in the key unless required, or it will be picked up as a variable name pattern and the values won't be searched.**
 
 **Note: Please check the signatures list for existing entries thoroughly before adding new ones.** If they exist, modify them instead. If they don't feel free to add new ones in the convention specified above.
 

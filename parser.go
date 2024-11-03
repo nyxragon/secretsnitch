@@ -144,28 +144,6 @@ func parseJsonAndDict(text string) []VariableData {
 	return keyValuePairs
 }
 
-// Match static JSON and Dict key-value pairs
-func parsePrivateKeys(text string) []VariableData {
-	pattern := `(-----BEGIN (?:[DR]SA|EC|PGP|OPENSSH)?\s?PRIVATE KEY(?: BLOCK)?-----)[A-Za-z0-9+\/=\s]{128,}(-----END (?:[DR]SA|EC|PGP|OPENSSH)?\s?PRIVATE KEY(?: BLOCK)?-----)`
-	re := regexp.MustCompile(pattern)
-	matches := re.FindAllStringSubmatch(text, -1)
-
-	var keyValuePairs []VariableData
-	for _, match := range matches {
-		if len(match) == 3 {
-			parsedData := VariableData{
-				Name:     match[1],
-				Operator: "-----",
-				Value:    match[0],
-			}
-			if parsedData.Value != "" {
-				keyValuePairs = append(keyValuePairs, parsedData)
-			}
-		}
-	}
-	return keyValuePairs
-}
-
 func removeEmptyAndDuplicateData(input []VariableData) []VariableData {
 	var parsedData []VariableData
 	exists := func(item VariableData) bool {

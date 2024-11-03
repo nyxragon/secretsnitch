@@ -26,7 +26,7 @@ func main() {
 
 	if *urlList != "" {
 		urls, _ := readLines(*urlList)
-		fetchFromUrlList(urls)
+		fetchFromUrlList(urls, true)
 		return
 	}
 
@@ -46,7 +46,7 @@ func main() {
 			successfulUrls = []string{scrapeWithSelenium(*URL)}
 			ScanFiles(successfulUrls)
 		} else {
-			fetchFromUrlList([]string{*URL})
+			fetchFromUrlList([]string{*URL}, true)
 		}
 		return
 	}
@@ -89,7 +89,7 @@ func main() {
 
 		}
 
-		fetchFromUrlList(patches)
+		fetchFromUrlList(patches, true)
 		defer os.RemoveAll(githubPatches.GithubCacheDir)
 		return
 	}
@@ -102,7 +102,7 @@ func main() {
 			patches = append(patches, patch.CommitPatchURL)
 		}
 
-		fetchFromUrlList(patches)
+		fetchFromUrlList(patches, true)
 		defer os.RemoveAll(gitlabPatches.GitlabCacheDir)
 		return
 	}
@@ -119,7 +119,7 @@ func main() {
 			gists = append(gists, gist.RawURL)
 		}
 
-		fetchFromUrlList(gists)
+		fetchFromUrlList(gists, true)
 		return
 	}
 
@@ -129,8 +129,8 @@ func main() {
 		if err != nil {
 			log.Fatalf("Error reading phishtank URLs: %v", err)
 		}
-		
-		fetchFromUrlList(urls)
+
+		fetchFromUrlList(urls, true)
 		return
 	}
 

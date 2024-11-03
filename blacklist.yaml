@@ -1,5 +1,28 @@
+# Some notes: 
+# do not add a regex to blacklist "_0x1be7a8(0xe8e)})[_0x1be7a8(0x3cf)". It may contain strings on CSR pages.
+
 - (?i)data:.+/
 - (?i)image/[a-z]{1,4}
 - (?i)sha[0-9]{0,3}-
 - (?i)your[_-].+[-_]here
 - db.String
+- <(.*)API_KEY(.*)(HERE){0,1}>
+- string()
+- htmlFor="password"
+- INVALID_PASSWORD
+- label for=
+- \*\*\*\*
+- XXXXXX
+- sys\.argv\[\d\]
+- FORGOT_PASSWORD
+- RESET_PASSWORD
+- React.
+- .+.m3u8
+- input type=
+- Enter
+- useState\(''\)
+- \]\(\)\}
+- catchAsync\(async
+- z.object\(
+- button
+- label

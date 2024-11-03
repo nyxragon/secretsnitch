@@ -5,7 +5,6 @@ import (
 	"os"
 	"regexp"
 
-	"github.com/dlclark/regexp2"
 	"gopkg.in/yaml.v3"
 )
 
@@ -14,8 +13,8 @@ var (
 )
 
 type Signature struct {
-	Name string
-	Keys map[string]string
+	Name  string
+	Items map[string]regexp.Regexp
 }
 
 func readSignatures() []Signature {
@@ -36,16 +35,16 @@ func readSignatures() []Signature {
 
 	for _, serviceMap := range services {
 		for serviceName, keys := range serviceMap {
-			keyMap := make(map[string]string)
+			keyMap := make(map[string]regexp.Regexp)
 			for _, keyPair := range keys {
 				for keyName, keyValue := range keyPair {
-					regexp2.MustCompile(keyValue, 0)
-					keyMap[keyName] = keyValue
+					re := regexp.MustCompile(keyValue)
+					keyMap[keyName] = *re
 				}
 			}
 			parsedSignatures = append(parsedSignatures, Signature{
-				Name: serviceName,
-				Keys: keyMap,
+				Name:  serviceName,
+				Items: keyMap,
 			})
 		}
 	}

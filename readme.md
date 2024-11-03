@@ -30,7 +30,7 @@ A fast continuous secret scanner and endpoint extractor in Golang!
 
 - **Community-driven**: sourced from Google searches, ChatGPT, and open-source lists like GitGuardian.
 
-- **Easy contribution**: Find a missing secret or blacklist regular expression? Simply make a pull request by following the [contributing.md] guide!
+- **Easy contribution**: Find a missing secret or blacklist regular expression? Simply make a pull request by following the [contribution guide](contributing.md)!
 
 ## Usage
 
@@ -92,10 +92,10 @@ GitHub uses something called "patch" files to keep track of changes that are mad
 Lets say you would like to scan for commits from January 10, 2023 at 3 PM to January 15 2023 at 12 AM. You can run the below command
 
 ```bash
-./secretsnitch --github --from=2024-01-10-15 --to=2024-01-15-0 --workers=100
+./secretsnitch --github --from=2024-01-10-15 --to=2024-01-15-0 --workers=20
 ```
 
-Since the public GitHub API has rate limits, I recommend reducing the number of workers to strike the right balance between scraping commit files quickly and not exceed the official rate limit.
+Since the public GitHub API has rate limits, I recommend reducing the number of workers to strike the right balance between scraping commit files quickly and not exceed the official rate limit. Here, I chose 20, since it strikes the balance and doesn't breach the [80 content-generating requests per minute limit](https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api?apiVersion=2022-11-28).
 
 This results in the following output
 
@@ -128,7 +128,7 @@ SECRET DETECTED:
 If you want to run the scan on just the last hour, simply run the command without the `from` and `to` flags.
 
 ```bash
-./secretsnitch --github --workers=100
+./secretsnitch --github --workers=20
 ```
 
 #### Single URLs
@@ -250,6 +250,8 @@ Tunables available:
 
 - **workers**: The amount of workers that can run each operation concurrently. This should be set according to hardware factors like CPU threads, rate-limits etc. When you're bruteforcing a large list of URLs or a directory on a powerful server, set this number to a high number.
 
+<img src = "media/secretsnitch_recursion.drawio.png" alt = "Signatures">
+
 - **recursions**: Crawl URLs inside files, then crawl the URLs inside those URLs, then the URLs in the URLs in the URLs, then the URLs in the URLs in the URLs in the URLs, then... you get the point.
 
 - **retries**: Give up after trying so many times. Useful if the destination is misbehaving or crashing.
@@ -306,6 +308,8 @@ In addition to the above, the tool also looks for other assets that could work i
 
 #### Detection
 
+_Further reading: [contributing](contributing.md)
+
 <img src = "media/sigs_screenshot.png" alt = "Signatures">
 
 Detection uses two signature files supplied with the tool.
@@ -318,6 +322,8 @@ This file contains a list of regular expressions that the tool uses to catch sec
   - Variable patterns: These are patterns that are used to check for variable names where the secret may not have a recognizable pattern (for example, passwords). These are marked by the usage of the word `Variable` at the end of the signature's key.
 
   - Secret patterns: these are patterns that are commonly used by secrets, for example, `AIza...` for GCP keys, `AKIA` for AWS keys and so on.
+
+  - Block patterns: these are patterns that commonly exist in large blocks of text, for example, private key files.
 
 - `blacklist.yaml`
 This file contains a list of blacklist patterns that are skipped. These include things like blob data patterns for images and audio, certain placeholderstrings etc.
