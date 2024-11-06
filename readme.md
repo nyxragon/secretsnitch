@@ -283,7 +283,7 @@ There is also support for common structured file formats such as
 
 #### Parsing
 
-<img src = "media/secretsnitch_variable_scanner.drawio.png" alt = "Scanner workflow">
+<img src = "media/secretsnitch_parsing.drawio.png" alt = "Scanner workflow">
 
 Secretsnitch looks for two classifications of secrets:
 
