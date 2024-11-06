@@ -91,8 +91,8 @@
   - Configuration Refresh Token: (xoxe-[0-9]{0,2}-[a-zA-Z0-9-]{130,170})
   - App Token: (xapp-[0-9]{0,2}-[A-Z0-9]{8,13}-[0-9]{12,15}-[a-zA-Z0-9-]{60,70})
 
-# - StackUp
-#   - API Key: STACK_UP_AUTH
+- StackUp:
+  - API Key: (?i)STACK_UP_AUTH
 
 - Oracle:
   - Cloud Infrastructure: ocid1\.(tenancy|user)\.oc1\..[a-zA-Z0-9\-_]{59}
@@ -169,8 +169,8 @@
 #- Clearbit:
 #  - API Key: (?i)(?:clearbit)[^{}]{0,20}( ){0,1}[=:]( ){0,1}.{0,40}(sk_[0-9a-z_]{24,32})
 
-#- Django:
-#  - Secret Key: (?i)(?:django)[^{}()<>?*&:%@!\/=\n.,]{0,20}( ){0,1}[=:]( ){0,1}?.{0,40}([a-z0-9-//=+][^,._\s"\' \n]{40,128})
+- Flask:
+  - App Secret Key Variable: APP_SECRET_KEY
 
 - Shodan: 
   - API Key Variable: (?i)(shodan_key|shodan_api_key|shodan_token)
@@ -313,10 +313,10 @@
   - JSON Web Token: \beyJ[a-zA-Z0-9]{3,}\.eyJ[A-Za-z0-9_\\/+-]{3,}\.[A-Za-z0-9_\\/+-]{3,}\b
   - JSON Web Token Variable: (?i)JWT_SECRET
   #- Refresh Token Variable: (?i)refresh[_-]{0,1}token
-  #- Access Token Variable: (?i)access[_-]{0,1}token
+  - Access Token Variable: (?i)access[_-]{0,1}token
   - Password Variable: (?i)password
   - API Key Variable: (?i)_api_key
-  - Secret Key Variable: (?i)_secret_key
+  - Secret Key Variable: (?i)secret_key
   
   # URLs
   - Auth URL: (?i)((https?|ftps?|ssh|sftp)://[^":@>\]\[\n\s*/]+:[^:@/>\]\[\n\s*/]+([^>\]\[\n\s*:][@]{1})\w+(\.\w+)+)

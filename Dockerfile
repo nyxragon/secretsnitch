@@ -11,6 +11,7 @@ RUN apt-get update && apt-get install -y \
     chromium-driver
 
 RUN pip install selenium==4.18.1
+RUN pip install jsbeautifier
 
 COPY fetch_page.py /app/fetch_page.py
 

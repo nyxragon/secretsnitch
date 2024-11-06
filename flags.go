@@ -43,9 +43,6 @@ var (
 	// maximum number of page recursions
 	maxRetries *int
 
-	// Show data even if no secrets are caught
-	secretsOptional *bool
-
 	// Use selenium via Docker
 	selenium *bool
 
@@ -93,8 +90,6 @@ func customUsage() {
 	fmt.Println("")
 	fmt.Println("  --retries=<number>        Maximum retries before giving up (default: " + strconv.Itoa(*maxRetries) + ")")
 	fmt.Println("")
-	fmt.Println("  --secrets-optional        Display other data (such as endpoints, domains etc.) even if there are no secrets")
-	fmt.Println("")
 	fmt.Println("  --selenium                Scrape page using Selenium. This helps with pages that run client-side Javascript (note: this is slower)")
 	fmt.Println("")
 }
@@ -118,7 +113,6 @@ func setFlags() {
 	maxWorkers = pflag.Int("workers", 5000, "")
 	maxRecursions = pflag.Int("recursions", 0, "")
 	maxRetries = pflag.Int("retries", 3, "")
-	secretsOptional = pflag.Bool("secrets-optional", false, "")
 	selenium = pflag.Bool("selenium", false, "")
 	outputFile = pflag.String("output", defaultOutputDir, "")
 

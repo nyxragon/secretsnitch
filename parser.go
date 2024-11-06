@@ -2,11 +2,14 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"log"
 	"os"
 	"regexp"
 	"strings"
 
+	"github.com/tdewolff/minify"
+	"github.com/tdewolff/minify/js"
 	"gopkg.in/yaml.v3"
 )
 
@@ -162,4 +165,16 @@ func removeEmptyAndDuplicateData(input []VariableData) []VariableData {
 	}
 
 	return parsedData
+}
+
+func prettifyJS(text string) string {
+	m := minify.New()
+	m.AddFunc("text/javascript", js.Minify)
+	var prettyJS strings.Builder
+	err := m.Minify("text/javascript", &prettyJS, strings.NewReader(text))
+	if err != nil {
+		fmt.Println("Error minifying:", err)
+		return ""
+	}
+	return prettyJS.String()
 }

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"log"
 	"os"
@@ -36,38 +35,17 @@ type ToolData struct {
 }
 
 func grabURLs(text string) []string {
-
 	var captured []string
 	sourceUrl := grabSourceUrl(text)
-
 	baseUrl, _ := baseURL(sourceUrl)
 
 	if !strings.HasSuffix(baseUrl, "/") {
 		baseUrl += "/"
 	}
 
-	scanner := bufio.NewScanner(strings.NewReader(text))
-
 	rx := xurls.Relaxed()
 	rxUrls := rx.FindAllString(text, -1)
-
 	captured = append(captured, rxUrls...)
-
-	// split JS files for single quotes
-	for _, url := range rxUrls {
-		if strings.Count(url, "'") > 3 {
-			splitUrls := strings.Split(url, "'")
-			captured = append(captured, splitUrls...)
-		}
-	}
-
-	// split JS files for double quotes
-	for _, url := range rxUrls {
-		if strings.Count(url, "\"") > 3 {
-			splitUrls := strings.Split(url, "\"")
-			captured = append(captured, splitUrls...)
-		}
-	}
 
 	var splitText []string
 	splitText = append(splitText, strings.Split(text, "{")...)
@@ -75,32 +53,52 @@ func grabURLs(text string) []string {
 	splitText = append(splitText, strings.Split(text, "\n")...)
 	splitText = removeDuplicates(splitText)
 
-	for _, line := range splitText {
+	textChunks := make(chan string, len(splitText))
+	results := make(chan []string, len(splitText))
 
-		re := regexp.MustCompile(`(?:href|src|action|cite|data|formaction|poster)\s*=\s*["']([^"']+)["']`)
-		matches := re.FindAllStringSubmatch(line, -1)
+	var wg sync.WaitGroup
 
-		for _, matchGroups := range matches {
+	for i := 0; i < *maxWorkers; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			var workerCaptured []string
+			for line := range textChunks {
+				re := regexp.MustCompile(`(?:href|src|action|cite|data|formaction|poster)\s*=\s*["']([^"']+)["']`)
+				matches := re.FindAllStringSubmatch(line, -1)
 
-			resource := matchGroups[1]
+				for _, matchGroups := range matches {
+					resource := matchGroups[1]
 
-			if !strings.Contains(resource, "://") && !strings.HasPrefix(resource, "//") {
-				resource = strings.TrimPrefix(resource, "/")
-				resource = baseUrl + resource
-			} else if !strings.Contains(resource, "://") && strings.HasPrefix(resource, "//") {
-				resource = "https:" + resource
-				if strings.Contains(resource, "http://") {
-					resource = "http:" + resource
+					if !strings.Contains(resource, "://") && !strings.HasPrefix(resource, "//") {
+						resource = strings.TrimPrefix(resource, "/")
+						resource = baseUrl + resource
+					} else if !strings.Contains(resource, "://") && strings.HasPrefix(resource, "//") {
+						resource = "https:" + resource
+						if strings.Contains(resource, "http://") {
+							resource = "http:" + resource
+						}
+					}
+
+					workerCaptured = append(workerCaptured, resource)
 				}
 			}
-
-			captured = append(captured, resource)
-		}
-
+			results <- workerCaptured
+		}()
 	}
 
-	if err := scanner.Err(); err != nil {
-		log.Printf("error reading string: %s\n", err)
+	for _, line := range splitText {
+		textChunks <- line
+	}
+	close(textChunks)
+
+	go func() {
+		wg.Wait()
+		close(results)
+	}()
+
+	for workerCaptured := range results {
+		captured = append(captured, workerCaptured...)
 	}
 
 	var urls []string
@@ -111,7 +109,6 @@ func grabURLs(text string) []string {
 	}
 
 	return removeDuplicates(urls)
-
 }
 
 // to prevent duplicates
@@ -127,135 +124,133 @@ var capturedSecrets []SecretData
 //
 // ToolData - proprietary data type containing scan results
 func FindSecrets(text string) ToolData {
-
 	var output ToolData
-
 	sourceUrl := grabSourceUrl(text)
 	cacheFileName := makeCacheFilename(sourceUrl)
 
-	// Secret collection
-
-	text = strings.Replace(text, truncateGitBinaryData(text), "", -1) // Remove Git Binary data
-
-	splitText := splitText(text) // Break walls of text
-
-	// log.Println("Scanning " + strconv.Itoa(len(splitText)) + " tokens for secrets")
+	text = strings.Replace(text, truncateGitBinaryData(text), "", -1)
+	splitText := splitText(text)
 
 	domains, _ := textsubs.DomainsOnly(text, false)
-	// domains = textsubs.Resolve(domains)
-
 	capturedURLs := grabURLs(text)
 
-	for _, line := range splitText {
+	lineChan := make(chan string, len(splitText))
+	resultChan := make(chan ToolData)
+	var wg sync.WaitGroup
 
-		secretFound := false
+	worker := func() {
+		defer wg.Done()
+		for line := range lineChan {
+			var secretFound bool
+			var result ToolData
 
-		data, _ := extractKeyValuePairs(strings.Replace(line, sourceUrl, "", 1))
+			data, _ := extractKeyValuePairs(strings.Replace(line, sourceUrl, "", 1))
 
-		for _, variable := range data {
+			for _, variable := range data {
+				if containsBlacklisted(variable.Value) || containsBlacklisted(variable.Name) {
+					continue
+				}
 
-			if containsBlacklisted(variable.Value) || containsBlacklisted(variable.Name) {
-				continue
-			}
+				for _, provider := range signatures {
+					for service, regex := range provider.Items {
+						variableNameMatch := regex.FindAllString(variable.Name, 1)
+						variableValueMatch := regex.FindAllString(variable.Value, 1)
 
-			for _, provider := range signatures {
-				for service, regex := range provider.Items {
+						var tags []string
+						match := variableValueMatch
 
-					variableNameMatch := regex.FindAllString(variable.Name, 1)
-					variableValueMatch := regex.FindAllString(variable.Value, 1)
+						if strings.Contains(strings.ToLower(service), "block") {
+							match = regex.FindAllString(text, -1)
+							if len(match) > 0 {
+								variable.Name = strings.Split(match[0], "\n")[0]
+								variable.Value = match[0]
+								tags = append(tags, "textBlockMatched")
+							}
+						}
 
-					var tags []string
+						if strings.Contains(strings.ToLower(service), "variable") {
+							tags = append(tags, "variableNameMatched")
+							match = variableNameMatch
+						}
 
-					match := variableValueMatch
-
-					if strings.Contains(strings.ToLower(service), "block") {
-						/* files like SSH and PGP keys do not have "variables". As such
-						 * matching needs to be performed on the entire file.
-						 */
-						match = regex.FindAllString(text, -1)
 						if len(match) > 0 {
-							variable.Name = strings.Split(match[0], "\n")[0]
-							variable.Value = match[0]
-							tags = append(tags, "textBlockMatched")
-						}
-					}
-
-					if strings.Contains(strings.ToLower(service), "variable") {
-						/* this is to match the names of variables where the actual secret
-						 * has no pattern and the name of the variable is a better indicator
-						 * this approach yields more results, but also has a lot of false positives
-						 * and negatives.
-						 */
-						tags = append(tags, "variableNameMatched")
-						match = variableNameMatch
-						/* sometimes, password fields are set to "password",
-						 * so checking these is excessive and may lead to a false negative.
-						 */
-					}
-
-					if len(match) > 0 {
-
-						entropy := tsallisEntropy(match[0], 2)
-
-						providerString := strings.ToLower(strings.Split(provider.Name, ".")[0])
-						if strings.Contains(strings.ToLower(text), strings.ToLower(providerString)) && !strings.EqualFold(provider.Name, "Generic") {
-							tags = append(tags, "providerDetected")
-						}
-
-						if len(variable.Value) > 16 {
-							tags = append(tags, "longString")
-						}
-
-						if len(variableValueMatch) > 0 {
-							tags = append(tags, "variableValueMatched")
-						}
-
-						row, column := findPosition(text, variable.Value, line)
-						position := strconv.Itoa(row) + ":" + strconv.Itoa(column)
-
-						if len(variable.Value) >= 8 {
-
-							secret := SecretData{
-								Provider:       provider.Name,
-								ServiceName:    service,
-								Variable:       variable.Name,
-								Secret:         variable.Value,
-								Position:       position,
-								TsallisEntropy: entropy,
-								Tags:           tags,
+							entropy := tsallisEntropy(match[0], 2)
+							providerString := strings.ToLower(strings.Split(provider.Name, ".")[0])
+							if strings.Contains(strings.ToLower(text), strings.ToLower(providerString)) && !strings.EqualFold(provider.Name, "Generic") {
+								tags = append(tags, "providerDetected")
+							}
+							if len(variable.Value) > 16 {
+								tags = append(tags, "longString")
+							}
+							if len(variableValueMatch) > 0 {
+								tags = append(tags, "variableValueMatched")
 							}
 
-							output = ToolData{
-								Tool:            "secretsnitch",
-								ScanTimestamp:   time.Now().UTC().Format("2006-01-02T15:04:05.000Z07:00"),
-								SourceUrl:       sourceUrl,
-								Secret:          secret,
-								CacheFile:       makeCacheFilename(sourceUrl),
-								CapturedDomains: domains,
-								CapturedURLs:    capturedURLs,
-							}
+							row, column := findPosition(text, variable.Value, line)
+							position := strconv.Itoa(row) + ":" + strconv.Itoa(column)
 
-							if !containsSecret(capturedSecrets, secret) {
-								logSecret(output, outputFile)
-								capturedSecrets = append(capturedSecrets, secret)
-								printSecret(secret, sourceUrl, cacheFileName)
-								secretFound = true
-							}
+							if len(variable.Value) >= 8 {
+								secret := SecretData{
+									Provider:       provider.Name,
+									ServiceName:    service,
+									Variable:       variable.Name,
+									Secret:         variable.Value,
+									Position:       position,
+									TsallisEntropy: entropy,
+									Tags:           tags,
+								}
 
+								result = ToolData{
+									Tool:            "secretsnitch",
+									ScanTimestamp:   time.Now().UTC().Format("2006-01-02T15:04:05.000Z07:00"),
+									SourceUrl:       sourceUrl,
+									Secret:          secret,
+									CacheFile:       cacheFileName,
+									CapturedDomains: domains,
+									CapturedURLs:    capturedURLs,
+								}
+
+								if !containsSecret(capturedSecrets, secret) {
+									logSecret(result, outputFile)
+									capturedSecrets = append(capturedSecrets, secret)
+									printSecret(secret, sourceUrl, cacheFileName)
+									secretFound = true
+								}
+							}
+						}
+						if secretFound {
+							break
 						}
 					}
-
-				}
-				if secretFound {
-					break
+					if secretFound {
+						break
+					}
 				}
 			}
+
 			if secretFound {
-				break
+				resultChan <- result
 			}
-
 		}
+	}
 
+	for i := 0; i < *maxWorkers; i++ {
+		wg.Add(1)
+		go worker()
+	}
+
+	for _, line := range splitText {
+		lineChan <- line
+	}
+	close(lineChan)
+
+	go func() {
+		wg.Wait()
+		close(resultChan)
+	}()
+
+	for res := range resultChan {
+		output = res
 	}
 
 	if len(domains) > 0 {
@@ -320,9 +315,9 @@ func scanFile(filePath string, wg *sync.WaitGroup) {
 	sourceUrl := grabSourceUrl(text)
 
 	if sourceUrl != "" {
-		log.Printf("Searching for secrets in: %s (cached at: %s)", sourceUrl, makeCacheFilename(sourceUrl))
+		//log.Printf("Searching for secrets in: %s (cached at: %s)", sourceUrl, makeCacheFilename(sourceUrl))
 	} else {
-		log.Printf("Searching for secrets in: %s", filePath)
+		//log.Printf("Searching for secrets in: %s", filePath)
 	}
 
 	FindSecrets(text)

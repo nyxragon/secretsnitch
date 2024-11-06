@@ -74,8 +74,6 @@ Optional arguments:
 
   --retries=<number>        Maximum retries before giving up (default: 3)
 
-  --secrets-optional        Display other data (such as endpoints, domains etc.) even if there are no secrets
-
   --selenium                Scrape page using Selenium. This helps with pages that run client-side Javascript (note: this is slower)
 
 pflag: help requested
@@ -255,8 +253,6 @@ Tunables available:
 - **recursions**: Crawl URLs inside files, then crawl the URLs inside those URLs, then the URLs in the URLs in the URLs, then the URLs in the URLs in the URLs in the URLs, then... you get the point.
 
 - **retries**: Give up after trying so many times. Useful if the destination is misbehaving or crashing.
-
-- **secrets-optional**: Display other data such as URLs and domains even if there are no secrets. Useful for asset extraction.
 
 - **selenium**: If a site uses client-side rendering (CSR), you can use the Selenium plugin to have the Javascript be rendered first, then extract secrets from it. Please note that Docker needs to be installed for this to work.
 

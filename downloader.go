@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"strings"
 	"sync"
 	"time"
 
@@ -58,7 +59,13 @@ func scrapeURL(url string) string {
 				if err != nil {
 					log.Printf("Failed to read response body from %s: %s\n", url, err)
 				} else {
-					responseString := url + "\n---\n" + string(body)
+
+					responseString := string(body)
+					if strings.HasSuffix(url, ".js") {
+						responseString = prettifyJS(responseString)
+					}
+
+					responseString = url + "\n---\n" + responseString
 
 					err = os.WriteFile(cacheFileName, []byte(responseString), 0644)
 					if err != nil {

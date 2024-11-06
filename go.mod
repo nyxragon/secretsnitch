@@ -8,8 +8,10 @@ require (
 	github.com/0x4f53/textsubs v0.0.0-20240822231959-6b42e2197761
 	github.com/chromedp/chromedp v0.11.1
 	github.com/dlclark/regexp2 v1.11.4
+	github.com/fsouza/go-dockerclient v1.12.0
 	github.com/gocolly/colly v1.2.0
 	github.com/spf13/pflag v1.0.5
+	github.com/tdewolff/minify v2.3.6+incompatible
 	golang.org/x/exp v0.0.0-20241009180824-f66d83c29e7c
 	gopkg.in/yaml.v3 v3.0.1
 	mvdan.cc/xurls/v2 v2.5.0
@@ -29,7 +31,6 @@ require (
 	github.com/docker/docker v27.1.2+incompatible // indirect
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
-	github.com/fsouza/go-dockerclient v1.12.0 // indirect
 	github.com/gobwas/glob v0.2.3 // indirect
 	github.com/gobwas/httphead v0.1.0 // indirect
 	github.com/gobwas/pool v0.2.1 // indirect
@@ -53,6 +54,9 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/saintfish/chardet v0.0.0-20230101081208-5e3ef4b5456d // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
+	github.com/tdewolff/minify/v2 v2.21.1 // indirect
+	github.com/tdewolff/parse v2.3.4+incompatible // indirect
+	github.com/tdewolff/parse/v2 v2.7.19 // indirect
 	github.com/temoto/robotstxt v1.1.2 // indirect
 	github.com/weppos/publicsuffix-go v0.40.2 // indirect
 	golang.org/x/net v0.29.0 // indirect

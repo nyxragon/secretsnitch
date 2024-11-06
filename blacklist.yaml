@@ -7,22 +7,24 @@
 - (?i)your[_-].+[-_]here
 - db.String
 - <(.*)API_KEY(.*)(HERE){0,1}>
-- string()
+- (?i)string()
 - htmlFor="password"
-- INVALID_PASSWORD
+- (?i)INVALID_PASSWORD
 - label for=
 - \*\*\*\*
 - XXXXXX
 - sys\.argv\[\d\]
-- FORGOT_PASSWORD
-- RESET_PASSWORD
+- (?i)FORGOT_PASSWORD
+- (?i)RESET_PASSWORD
 - React.
 - .+.m3u8
 - input type=
-- Enter
+- (?i)Enter
 - useState\(''\)
 - \]\(\)\}
 - catchAsync\(async
 - z.object\(
 - button
 - label
+- (?i)login.Password
+- document.getElementById
