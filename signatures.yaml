@@ -75,11 +75,11 @@
 - GitLab:
   - Personal Access Token: (?i)glpat-[A-Za-z0-9\-_]{20}
   - OAuth Access Token: (?i)glOauth-[A-Za-z0-9\-_]{20,50}
-#  - GitLab Job Token: (?i)(?:gitlab-ci-token)[^{}]{0,20}( ){0,1}[=:]( ){0,1}([A-Za-z0-9\-_]{20,50})
+  - GitLab CI Token Variable: (?i)gitlab(-|_)ci(-|_)token
   - Repository Access Token: (?i)glrepo-[A-Za-z0-9\-_]{20,50}
-#  - Secret File Token: (?i)(?:secret_token|CI_JOB_TOKEN)[^{}]{0,20}( ){0,1}[=:]( ){0,1}([A-Za-z0-9\-_]{20,50})
+  # - Secret File Token: (?i)(?:secret_token|CI_JOB_TOKEN)[^{}]{0,20}( ){0,1}[=:]( ){0,1}([A-Za-z0-9\-_]{20,50})
   - Project Secret Token: (?i)glproj-[A-Za-z0-9\-_]{20,50}
-  - Classic Token: (?i)(?:gitlab)[^{}()<>?*&:%@!\/= \n]{0,40}[\"\']?\s{0,50}(?::|=>|=)\s{0,50}[\"\']?([a-zA-Z0-9-_]{20})
+  #- Classic Token: (?i)(?:gitlab)[^{}()<>?*&:%@!\/= \n]{0,40}[\"\']?\s{0,50}(?::|=>|=)\s{0,50}[\"\']?([a-zA-Z0-9-_]{20})
 
 - Slack:
   - User Token: (xox[ps]-[0-9]{8,13}-[0-9]{8,13}-[0-9]{8,13}-[a-zA-Z0-9-]{10,32})
