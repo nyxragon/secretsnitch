@@ -60,6 +60,9 @@ func extractKeyValuePairs(text string) ([]VariableData, error) {
 		jsonAndDicts := parseJsonAndDict(line)
 		assignmentPairs = append(assignmentPairs, jsonAndDicts...)
 
+		txtVariables := parseTxt(line)
+		assignmentPairs = append(assignmentPairs, txtVariables...)
+
 		xmlTags := parseXmlTags(line)
 		assignmentPairs = append(assignmentPairs, xmlTags)
 
@@ -123,6 +126,33 @@ func parseXmlTags(line string) VariableData {
 // Match static JSON and Dict key-value pairs
 func parseJsonAndDict(text string) []VariableData {
 	pattern := `["']?([^"':\s]+)["']?\s*:\s*["']?([^"'\n]+)["']?`
+	re := regexp.MustCompile(pattern)
+	matches := re.FindAllStringSubmatch(text, -1)
+	var keyValuePairs []VariableData
+	for _, match := range matches {
+		if len(match) == 3 {
+			parsedData := VariableData{
+				Name:     match[1],
+				Operator: ":",
+				Value:    match[2],
+			}
+			if parsedData.Value != "" {
+
+				parsedData.Value = strings.Trim(parsedData.Value, "\"")
+				parsedData.Value = strings.Trim(parsedData.Value, "'")
+				parsedData.Value = strings.Trim(parsedData.Value, "`")
+
+				keyValuePairs = append(keyValuePairs, parsedData)
+			}
+		}
+	}
+
+	return keyValuePairs
+}
+
+// Match static text key-value pairs
+func parseTxt(text string) []VariableData {
+	pattern := `["']?([^"':\s]+)["']?\s*-\s*["']?([^"'\n ]+)["']?`
 	re := regexp.MustCompile(pattern)
 	matches := re.FindAllStringSubmatch(text, -1)
 	var keyValuePairs []VariableData

@@ -90,6 +90,7 @@
   - Signing Secret: (?i)xox[a-z]-[0-9a-zA-Z-]{10,}
   - Configuration Refresh Token: (xoxe-[0-9]{0,2}-[a-zA-Z0-9-]{130,170})
   - App Token: (xapp-[0-9]{0,2}-[A-Z0-9]{8,13}-[0-9]{12,15}-[a-zA-Z0-9-]{60,70})
+  - Webhook URL: https://hooks\.slack\.com/services/.{8,128}
 
 - StackUp:
   - API Key: (?i)STACK_UP_AUTH
@@ -175,6 +176,12 @@
 - Shodan: 
   - API Key Variable: (?i)(shodan_key|shodan_api_key|shodan_token)
 
+- Homebrew:
+  - API Token Variable: (?i)HOMEBREW_GITHUB_API_TOKEN
+
+- Jekyll:
+  - GitHub API Token Variable: (?i)JEKYLL_GITHUB_TOKEN
+
 - OpenAI:
   - Project API Key: (?i)sk-proj-[\w-]+T3BlbkFJ[\w-]+
   - User API Key: (?i)sk-[^proj]\w.+T3BlbkFJ[\w-]+
@@ -232,7 +239,8 @@
 #  - Cloud User Key: (?i)(?:ibm)[^{}]{0,20}( ){0,1}[=:]( ){0,1}(-_[A-Za-z0-9_-]{42})
 
 - Heroku:
-  - Platform API Key: (?i)heroku["':= ]{0,5}["':= ]([0-9Aa-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})
+  - API Key Variable: (?i)heroku_api_key
+  - App Name Variable: (?i)heroku_app_name
 
 - Freshdesk:
   - API Token: (?i)(?:freshdesk)[^{}()<>?*&:%@.\-!\/\n]{0,40}\b([0-9A-Za-z]{16,24})
@@ -305,19 +313,6 @@
   - Project ID Variable: (?i)PROJECT_ID_VERCEL
   - Turbo Build Token Variable: (?i)TURBO_TOKEN
   - Access Token Variable: (?i)VERCEL_ACCESS_TOKEN
-
-- Generic:
-  - Shell Command: "[\\w. ]+(--username|-u|--user|--uname|--userid|--id|-i) [^$][\\w_\\-.\"']{1,256} (--password|-p|--pwd|--pass)[^$<{][\\w_\\-.\"']{4,253}"
-  - Bearer Token: "(Authorization: )*((b|B)earer [a-zA-Z0-9+\\/._=-]{16,512})(={0,2})"
-  - Basic Token: "(Authorization: )*((b|B)asic [a-zA-Z0-9+\\/._=-]{16,512})(={0,2})"
-  - JSON Web Token: \beyJ[a-zA-Z0-9]{3,}\.eyJ[A-Za-z0-9_\\/+-]{3,}\.[A-Za-z0-9_\\/+-]{3,}\b
-  - JSON Web Token Variable: (?i)JWT_SECRET
-  #- Refresh Token Variable: (?i)refresh[_-]{0,1}token
-  - Access Token Variable: (?i)access[_-]{0,1}token
-  - Password Variable: (?i)password
-  - API Key Variable: (?i)_api_key
-  - Secret Key Variable: (?i)secret_key
-  
   # URLs
   - Auth URL: (?i)((https?|ftps?|ssh|sftp)://[^":@>\]\[\n\s*/]+:[^:@/>\]\[\n\s*/]+([^>\]\[\n\s*:][@]{1})\w+(\.\w+)+)
   - Redis URL: (?i)((redis?)://[^":@>\]\[\n\s*/]+:[^:@/>\]\[\n\s*/]+([^>\]\[\n\s*:][@]{1})\w+(\.\w+)+)
@@ -334,3 +329,16 @@
 - PuTTY:
   - RSA Private Key Block: "/^PuTTY-User-Key-File-[0-9]: ssh-rsa\\s*Encryption: none(?:.|\\s?)*?Private-MAC:$/"
   - DSA Private Key: "/^PuTTY-User-Key-File-[0-9]: ssh-dsa\\s*Encryption: none(?:.|\\s?)*?Private-MAC:$/"
+
+- Generic:
+  - Shell Command: "[\\w. ]+(--username|-u|--user|--uname|--userid|--id|-i) [^$][\\w_\\-.\"']{1,256} (--password|-p|--pwd|--pass)[^$<{][\\w_\\-.\"']{4,253}"
+  - Bearer Token: "(Authorization: )*((b|B)earer [a-zA-Z0-9+\\/._=-]{16,512})(={0,2})"
+  - Basic Token: "(Authorization: )*((b|B)asic [a-zA-Z0-9+\\/._=-]{16,512})(={0,2})"
+  - JSON Web Token: \beyJ[a-zA-Z0-9]{3,}\.eyJ[A-Za-z0-9_\\/+-]{3,}\.[A-Za-z0-9_\\/+-]{3,}\b
+  - JSON Web Token Variable: (?i)JWT_SECRET
+  #- Refresh Token Variable: (?i)refresh[_-]{0,1}token
+  - Access Token Variable: (?i)access[_-]{0,1}token
+  - Password Variable: (?i)password
+  - API Key Variable: (?i)_api_key
+  - Secret Key Variable: (?i)secret_key
+  

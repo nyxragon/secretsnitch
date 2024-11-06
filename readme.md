@@ -383,6 +383,7 @@ This tool needs contributors to grow and become extremely versatile and powerful
 
 - [GitGuardian](https://docs.gitguardian.com/secrets-detection/secrets-detection-engine/detectors/supported_credentials), for their extensive regular expressions list. Can't thank them enough for kickstarting this.
 - [GitSecrets](https://github.com/awslabs/git-secrets)
+- [OSINT-Cheat-sheet](https://github.com/Jieyab89/OSINT-Cheat-sheet)
 - [Secretsearch](https://gitlab.com/redhuntlabs/secretsearch), the predecessor of this project. I do not maintain it anymore.
 
 ## License
