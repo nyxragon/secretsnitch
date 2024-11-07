@@ -72,6 +72,12 @@ func extractKeyValuePairs(text string) ([]VariableData, error) {
 		golangEquals := parseGolangEquals(line)
 		assignmentPairs = append(assignmentPairs, golangEquals...)
 
+		phpArrowEquals := parsePhpArrow(line)
+		assignmentPairs = append(assignmentPairs, phpArrowEquals...)
+
+		phpClosureArrowEquals := parsePhpClosureArrow(line)
+		assignmentPairs = append(assignmentPairs, phpClosureArrowEquals...)
+
 		colons := parseColons(line)
 		assignmentPairs = append(assignmentPairs, colons...)
 
@@ -101,6 +107,7 @@ func parseColons(line string) []VariableData {
 			Operator: ":",
 			Value:    match[2],
 		}
+
 		parsedData = append(parsedData, varData)
 	}
 
@@ -119,6 +126,46 @@ func parseEquals(line string) []VariableData {
 		varData := VariableData{
 			Name:     match[1],
 			Operator: "=",
+			Value:    match[2],
+		}
+		parsedData = append(parsedData, varData)
+	}
+
+	return parsedData
+}
+
+// Match static arrow key-value pairs for languages like php
+func parsePhpArrow(line string) []VariableData {
+	var parsedData []VariableData
+
+	reArrow := regexp.MustCompile(`(\S+)\s*->\s*(\S+)`)
+
+	matches := reArrow.FindAllStringSubmatch(line, -1)
+
+	for _, match := range matches {
+		varData := VariableData{
+			Name:     match[1],
+			Operator: "->",
+			Value:    match[2],
+		}
+		parsedData = append(parsedData, varData)
+	}
+
+	return parsedData
+}
+
+// Match static closure arrow key-value pairs for languages like php
+func parsePhpClosureArrow(line string) []VariableData {
+	var parsedData []VariableData
+
+	reArrow := regexp.MustCompile(`(\S+)\s*=>\s*(\S+)`)
+
+	matches := reArrow.FindAllStringSubmatch(line, -1)
+
+	for _, match := range matches {
+		varData := VariableData{
+			Name:     match[1],
+			Operator: "=>",
 			Value:    match[2],
 		}
 		parsedData = append(parsedData, varData)
