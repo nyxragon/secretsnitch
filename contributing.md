@@ -20,18 +20,18 @@ The format to be followed is as follows
 
 There are two types of signatures 
 
-- Variable name patterns: These are denoted by the use of the word "Variable" in their key. These for variable names in code, where the secret may not have a recognizable pattern, but the name of the variable generally follows a pattern.
+- Variable name patterns: these are denoted by the use of the word "Variable" in their key. These are for variable names in code, where the secret may not have a recognizable pattern, but the name of the variable generally follows a pattern.
 For example, passwords are random, but their field tends to be named "password" in most instances. Therefore, this is a Generic password variable pattern.
 
-- Secret patterns: these are patterns that are commonly used by secrets. The more specific these are, the fewer false positives they result in.
-For example, `AIza...` for GCP keys, `AKIA` for AWS keys and so on.
-
-- Block patterns: these are patterns that commonly exist in large blocks of text, for example, private key files.
+- Block patterns: these are denoted by the use of the word "Block" in their key. They contain patterns that commonly exist in large blocks of text, for example, private key files.
 For example, `-----BEGIN OPENSSH PRIVATE KEY-----`.
 
-**Do not use the word 'variable' or 'block' in the key unless required, or it will be picked up as a variable name pattern and the values won't be searched.**
+- Secret patterns: these are patterns that are commonly used by secrets. Their keys don't consist of reserved words like the ones above. The more unique the regular expressions are, the fewer false positives they result in.
+For example, `AIza...` for GCP keys, `AKIA` for AWS keys and so on.
 
-**Note: Please check the signatures list for existing entries thoroughly before adding new ones.** If they exist, modify them instead. If they don't feel free to add new ones in the convention specified above.
+**Note 1: Do not use the word 'variable' or 'block' in the key unless required since they're reserved and will be picked up as variable names and their values won't be searched.**
+
+**Note 2: Always check the signatures list for existing entries thoroughly before adding new ones.** If they exist, modify them instead. If they don't feel free to add new ones in the exact convention specified above.
 
 ### Adding to `blacklist.yaml`
 
