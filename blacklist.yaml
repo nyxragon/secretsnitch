@@ -28,3 +28,4 @@
 - label
 - (?i)login.Password
 - document.getElementById
+- \{\}

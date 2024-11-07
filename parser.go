@@ -66,8 +66,15 @@ func extractKeyValuePairs(text string) ([]VariableData, error) {
 		xmlTags := parseXmlTags(line)
 		assignmentPairs = append(assignmentPairs, xmlTags)
 
-		colonsAndEquals := parseColonsAndEquals(line)
-		assignmentPairs = append(assignmentPairs, colonsAndEquals)
+		equals := parseEquals(line)
+		assignmentPairs = append(assignmentPairs, equals...)
+
+		golangEquals := parseGolangEquals(line)
+		assignmentPairs = append(assignmentPairs, golangEquals...)
+
+		colons := parseColons(line)
+		assignmentPairs = append(assignmentPairs, colons...)
+
 	}
 
 	// Check for errors during scanning
@@ -80,24 +87,63 @@ func extractKeyValuePairs(text string) ([]VariableData, error) {
 	return assignmentPairs, nil
 }
 
-// Match static colon/equals key-value pairs
-func parseColonsAndEquals(line string) VariableData {
-	var parsedData VariableData
-	var reStaticColon = regexp.MustCompile(`(\w+\){0,1}\]{0,1}) {0,1}(:=|=|:) {0,1}(\S+)`)
+// Match static colon key-value pairs
+func parseColons(line string) []VariableData {
+	var parsedData []VariableData
 
-	if matches := reStaticColon.FindStringSubmatch(line); matches != nil {
+	reColons := regexp.MustCompile(`["']?(\w+)["']?\s*:\s*([^,\n]+)`)
 
-		value := matches[3]
-		value = strings.Trim(value, "\"")
-		value = strings.Trim(value, "'")
-		value = strings.Trim(value, "`")
+	matches := reColons.FindAllStringSubmatch(line, -1)
 
-		parsedData = VariableData{
-			Name:     matches[1],
-			Operator: matches[2],
-			Value:    value,
+	for _, match := range matches {
+		varData := VariableData{
+			Name:     match[1],
+			Operator: ":",
+			Value:    match[2],
 		}
+		parsedData = append(parsedData, varData)
 	}
+
+	return parsedData
+}
+
+// Match static equals key-value pairs from places like CLI commands
+func parseEquals(line string) []VariableData {
+	var parsedData []VariableData
+
+	reEquals := regexp.MustCompile(`(\S+)\s*=\s*(\S+)`)
+
+	matches := reEquals.FindAllStringSubmatch(line, -1)
+
+	for _, match := range matches {
+		varData := VariableData{
+			Name:     match[1],
+			Operator: "=",
+			Value:    match[2],
+		}
+		parsedData = append(parsedData, varData)
+	}
+
+	return parsedData
+}
+
+// Match static equals key-value pairs from places like CLI commands
+func parseGolangEquals(line string) []VariableData {
+	var parsedData []VariableData
+
+	reEquals := regexp.MustCompile(`(\w+)\s*:=\s*(\S+)`)
+
+	matches := reEquals.FindAllStringSubmatch(line, -1)
+
+	for _, match := range matches {
+		varData := VariableData{
+			Name:     match[1],
+			Operator: ":=",
+			Value:    match[2],
+		}
+		parsedData = append(parsedData, varData)
+	}
+
 	return parsedData
 }
 

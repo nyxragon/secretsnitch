@@ -75,9 +75,9 @@
 - GitLab:
   - Personal Access Token: (?i)glpat-[A-Za-z0-9\-_]{20}
   - OAuth Access Token: (?i)glOauth-[A-Za-z0-9\-_]{20,50}
-  - GitLab CI Token Variable: (?i)gitlab(-|_)ci(-|_)token
+  - GitLab CI Token Variable: (?i)gitlab(?:-|_|.)(?:ci(?:-|_|.))?(?:job(?:-|_|.))?token
   - Repository Access Token: (?i)glrepo-[A-Za-z0-9\-_]{20,50}
-  # - Secret File Token: (?i)(?:secret_token|CI_JOB_TOKEN)[^{}]{0,20}( ){0,1}[=:]( ){0,1}([A-Za-z0-9\-_]{20,50})
+  - Secret File Token: (?i)(?:secret_token|CI_JOB_TOKEN)[^{}]{0,20}( ){0,1}[=:]( ){0,1}([A-Za-z0-9\-_]{20,50})
   - Project Secret Token: (?i)glproj-[A-Za-z0-9\-_]{20,50}
   #- Classic Token: (?i)(?:gitlab)[^{}()<>?*&:%@!\/= \n]{0,40}[\"\']?\s{0,50}(?::|=>|=)\s{0,50}[\"\']?([a-zA-Z0-9-_]{20})
 
@@ -295,6 +295,12 @@
 - Pingdom:
   - Token: (?i)(?:pingdom).{0,40}[\"\'`]?\s{0,50}(?::|=>|=|,)\s{0,50}[\"\'`]?([a-zA-Z-0-9-_]{60,80})
 
+- Ngrok:
+  - Auth Token Variable: (?i)ngrok.set_auth_token
+  - API Key Block: (?i)add-api-key
+  - Authentication Token Block: (?i)add-authtoken	
+  - Connection URL Block: (?i)add-connect-url
+
 - Line:
   - Token Variable: (?i)line_(channel|secret|token)
 
@@ -313,22 +319,14 @@
   - Project ID Variable: (?i)PROJECT_ID_VERCEL
   - Turbo Build Token Variable: (?i)TURBO_TOKEN
   - Access Token Variable: (?i)VERCEL_ACCESS_TOKEN
-  # URLs
-  - Auth URL: (?i)((https?|ftps?|ssh|sftp)://[^":@>\]\[\n\s*/]+:[^:@/>\]\[\n\s*/]+([^>\]\[\n\s*:][@]{1})\w+(\.\w+)+)
-  - Redis URL: (?i)((redis?)://[^":@>\]\[\n\s*/]+:[^:@/>\]\[\n\s*/]+([^>\]\[\n\s*:][@]{1})\w+(\.\w+)+)
-  - MongoDB URL: (?i)(?:mongodb:|mongodb\+srv:)//[\S]{1,256}:[\S]{1,256}@[-.%\w\/:]+\.[\S]+
-  - MySQL URL: (?i)(?:mysql:)//[\S]{1,256}:[\S]{1,256}@[-.%\w\/:]+\.[\S]+
-  - File Transfer Protocol (FTP) URL: ftp://[a-zA-Z0-9-_+.@]+:[^@]+@[^/]+
-  - Advanced Message Queuing Protocol (AMQP) URL: amqp://[a-zA-Z0-9-_+.@]+:[^@]+@[^/]+
-  - Postgresql URL: (?i)(?:pgsql:|postgres:|postgresql:)//[\S]{1,256}:[\S]{1,256}@[-.%\w\/:]+\.[\S]+
-  
-  # Private Keys
-  - JSON Web Key Block: /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/gm
-  - Private Key Block: (?i)-{0,5} ?BEGIN (RSA|ENCRYPTED|OPENSSH|SSH2) PRIVATE KEY ?-{0,5} ?([\s\S]*?)-{0,5} ?END (RSA|ENCRYPTED|OPENSSH|SSH2) PRIVATE KEY ?-{0,5}
 
 - PuTTY:
-  - RSA Private Key Block: "/^PuTTY-User-Key-File-[0-9]: ssh-rsa\\s*Encryption: none(?:.|\\s?)*?Private-MAC:$/"
-  - DSA Private Key: "/^PuTTY-User-Key-File-[0-9]: ssh-dsa\\s*Encryption: none(?:.|\\s?)*?Private-MAC:$/"
+  - Private Lines Variable: Private-Lines
+  - Private MAC Variable: Private-MAC
+
+- Postgresql:
+  - URL: (?i)(?:pgsql:|postgres:|postgresql:)//[\S]{1,256}:[\S]{1,256}@[-.%\w\/:]+\.[\S]+
+  - Password Variable: (?i)POSTGRES_PASSWORD
 
 - Generic:
   - Shell Command: "[\\w. ]+(--username|-u|--user|--uname|--userid|--id|-i) [^$][\\w_\\-.\"']{1,256} (--password|-p|--pwd|--pass)[^$<{][\\w_\\-.\"']{4,253}"
@@ -336,9 +334,24 @@
   - Basic Token: "(Authorization: )*((b|B)asic [a-zA-Z0-9+\\/._=-]{16,512})(={0,2})"
   - JSON Web Token: \beyJ[a-zA-Z0-9]{3,}\.eyJ[A-Za-z0-9_\\/+-]{3,}\.[A-Za-z0-9_\\/+-]{3,}\b
   - JSON Web Token Variable: (?i)JWT_SECRET
+  # Tokens
   #- Refresh Token Variable: (?i)refresh[_-]{0,1}token
   - Access Token Variable: (?i)access[_-]{0,1}token
+  - Token Variable: (?i)token
   - Password Variable: (?i)password
   - API Key Variable: (?i)_api_key
+  - API Key Header Variable: X-Api-Key
   - Secret Key Variable: (?i)secret_key
-  
+  - Secret Variable: (?i)secret
+  - Consumer Key Variable: (?i)consumer(\.|_)?key
+  - Consumer Secret Variable: (?i)consumer(\.|_)?secret
+  # URLs
+  - Auth URL: (?i)((https?|ftps?|ssh|sftp)://[^":@>\]\[\n\s*/]+:[^:@/>\]\[\n\s*/]+([^>\]\[\n\s*:][@]{1})\w+(\.\w+)+)
+  - Redis URL: (?i)((redis?)://[^":@>\]\[\n\s*/]+:[^:@/>\]\[\n\s*/]+([^>\]\[\n\s*:][@]{1})\w+(\.\w+)+)
+  - MongoDB URL: (?i)(?:mongodb:|mongodb\+srv:)//[\S]{1,256}:[\S]{1,256}@[-.%\w\/:]+\.[\S]+
+  - MySQL URL: (?i)(?:mysql:)//[\S]{1,256}:[\S]{1,256}@[-.%\w\/:]+\.[\S]+
+  - File Transfer Protocol (FTP) URL: ftp://[a-zA-Z0-9-_+.@]+:[^@]+@[^/]+
+  - Advanced Message Queuing Protocol (AMQP) URL: amqp://[a-zA-Z0-9-_+.@]+:[^@]+@[^/]+
+  # Private Keys
+  - JSON Web Key Block: /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/gm
+  - Private Key Block: -{0,5} ?BEGIN (?:RSA |ENCRYPTED |OPENSSH |SSH2 )?PRIVATE KEY ?-{0,5} ?([\s\S]*?)-{0,5} ?END (?:RSA |ENCRYPTED |OPENSSH |SSH2 )?PRIVATE KEY ?-{0,5}
