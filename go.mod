@@ -1,4 +1,4 @@
-module secretsnitch
+module github.com/0x4f53/secretsnitch
 
 go 1.23.0
 
