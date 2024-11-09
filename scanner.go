@@ -4,14 +4,12 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"regexp"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/0x4f53/textsubs"
-	"mvdan.cc/xurls/v2"
 )
 
 type SecretData struct {
@@ -32,83 +30,7 @@ type ToolData struct {
 	SourceUrl       string
 	CapturedDomains []string
 	CapturedURLs    []string
-}
-
-func grabURLs(text string) []string {
-	var captured []string
-	sourceUrl := grabSourceUrl(text)
-	baseUrl, _ := baseURL(sourceUrl)
-
-	if !strings.HasSuffix(baseUrl, "/") {
-		baseUrl += "/"
-	}
-
-	rx := xurls.Relaxed()
-	rxUrls := rx.FindAllString(text, -1)
-	captured = append(captured, rxUrls...)
-
-	var splitText []string
-	splitText = append(splitText, strings.Split(text, "{")...)
-	splitText = append(splitText, strings.Split(text, ",")...)
-	splitText = append(splitText, strings.Split(text, "\n")...)
-	splitText = removeDuplicates(splitText)
-
-	textChunks := make(chan string, len(splitText))
-	results := make(chan []string, len(splitText))
-
-	var wg sync.WaitGroup
-
-	for i := 0; i < *maxWorkers; i++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			var workerCaptured []string
-			for line := range textChunks {
-				re := regexp.MustCompile(`(?:href|src|action|cite|data|formaction|poster)\s*=\s*["']([^"']+)["']`)
-				matches := re.FindAllStringSubmatch(line, -1)
-
-				for _, matchGroups := range matches {
-					resource := matchGroups[1]
-
-					if !strings.Contains(resource, "://") && !strings.HasPrefix(resource, "//") {
-						resource = strings.TrimPrefix(resource, "/")
-						resource = baseUrl + resource
-					} else if !strings.Contains(resource, "://") && strings.HasPrefix(resource, "//") {
-						resource = "https:" + resource
-						if strings.Contains(resource, "http://") {
-							resource = "http:" + resource
-						}
-					}
-
-					workerCaptured = append(workerCaptured, resource)
-				}
-			}
-			results <- workerCaptured
-		}()
-	}
-
-	for _, line := range splitText {
-		textChunks <- line
-	}
-	close(textChunks)
-
-	go func() {
-		wg.Wait()
-		close(results)
-	}()
-
-	for workerCaptured := range results {
-		captured = append(captured, workerCaptured...)
-	}
-
-	var urls []string
-	for _, url := range captured {
-		if strings.Contains(url, "://") && strings.Contains(url, ".") && !strings.Contains(url, "'") && url != sourceUrl {
-			urls = append(urls, url)
-		}
-	}
-
-	return removeDuplicates(urls)
+	CapturedEmails  []string
 }
 
 // to prevent duplicates
@@ -132,7 +54,10 @@ func FindSecrets(text string) ToolData {
 	splitText := splitText(text)
 
 	domains, _ := textsubs.DomainsOnly(text, false)
-	capturedURLs := grabURLs(text)
+	capturedURLs := extractURLs(text)
+
+	capturedEmails := extractEmails(text)
+	capturedEmails = removeDuplicates(capturedEmails)
 
 	lineChan := make(chan string, len(splitText))
 	resultChan := make(chan ToolData)
@@ -208,6 +133,7 @@ func FindSecrets(text string) ToolData {
 									CacheFile:       cacheFileName,
 									CapturedDomains: domains,
 									CapturedURLs:    capturedURLs,
+									CapturedEmails:  capturedEmails,
 								}
 
 								if !containsSecret(capturedSecrets, secret) {
