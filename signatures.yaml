@@ -5,6 +5,8 @@
   # - Cognito User Pool ID: (?i)us-[a-z]{2,}-[a-z]{4,}-\d{1,}
   - RDS Password: (?i)(rds\-master\-password|db\-password)[^\"'`\n]{0,40}[\"'`\n]{0,3}[a-zA-Z0-9@#*+=]{8,}
   - S3 Private Key Variable: (?i)AWS_S3_PRIVATE_KEY|s3_key|S3_PRIVATE_KEY
+  - Security Token Header Variable: (?i)X-Amz-Security-Token
+  - API Gateway Key Source Header Variable: (?i)x-amazon-apigateway-api-key-source
   - S3 Bucket: (?i)AWS_S3_BUCKET|s3_bucket
   - SNS Confirmation Token: (?i)SubscribeURL":"https:\/\/sns\.[a-z0-9-]+\.amazonaws\.com\/?Action=ConfirmSubscription&Token=[a-zA-Z0-9-=_]+
   - SES SMTP Password Variable: (?i)ses_smtp_password
@@ -14,7 +16,7 @@
 
 - Microsoft:
   - Azure API Key Variable: (?i)Ocp-Apim-Subscription-Key
-  - Azure Functions Key Variable: (?i)x-functions-key
+  - Azure Functions Key Header Variable: (?i)x-functions-key
   # - Azure account key
   # - Azure account name
   - Azure Connection String: (?i)(.*.windows.net).+(password["':= ]{0,5}["':= ]{0,5}.{5,})
@@ -60,6 +62,7 @@
   - Cloud Service Account Private Key: (?i)"-----BEGIN PRIVATE KEY-----[A-Za-z0-9\/+=\n]+-----END PRIVATE KEY-----"
   - Cloud Service Account Key ID: (?i)"private_key_id":\s*"[a-f0-9]{32}"
   - Cloud Project Number: (?i)"project_number":\s*"\d{12}"
+  - API Key Header Variable: (?i)x-goog-api-key
   - Client ID: "[0-9]+-[0-9A-Za-z_]{32}\\.apps\\.googleusercontent\\.com"
 
 - GitHub:
@@ -80,6 +83,15 @@
   - Secret File Token: (?i)(?:secret_token|CI_JOB_TOKEN)[^{}]{0,20}( ){0,1}[=:]( ){0,1}([A-Za-z0-9\-_]{20,50})
   - Project Secret Token: (?i)glproj-[A-Za-z0-9\-_]{20,50}
   #- Classic Token: (?i)(?:gitlab)[^{}()<>?*&:%@!\/= \n]{0,40}[\"\']?\s{0,50}(?::|=>|=)\s{0,50}[\"\']?([a-zA-Z0-9-_]{20})
+
+- Cisco:
+  - Meraki API Key Header Variable: (?i)X-Cisco-Meraki-API-Key
+
+- CoinMarketCap:
+  - API Key Header Variable: (?i)X-CMC_PRO_API_KEY
+
+- Algolia:
+  - API Key Header Variable: (?i)X-Algolia-API-Key
 
 - Slack:
   - User Token: (xox[ps]-[0-9]{8,13}-[0-9]{8,13}-[0-9]{8,13}-[a-zA-Z0-9-]{10,32})
@@ -225,6 +237,7 @@
 
 - Figma:
   - Personal Access Token: (figd_[a-zA-Z0-9-_]{14,32}_[a-zA-Z0-9-_]{14,32})
+  - Token Header Variable: (?i)X-Figma-Token
 
 - Adafruit.io:
   - API Key: aio_[a-zA-Z0-9]{28}
@@ -259,9 +272,6 @@
 
 - Fastly:
   - Personal Token:	(?i)(?:fastly)[^{}()<>?*&%'",@!\-/=\n]{0,40}\b([A-Za-z0-9_-]{32})\b
-
-#- Intercom:
-#  - Access Token:	(?i)(?:intercom).{5,40}[:= ]\b([a-zA-Z0-9+\\=]{32,64})
 
 - Asana:
   - Personal Access Token: (?i)(?:asana).{0,40}([0-9]{1,}\/[0-9]{10,}:[A-Za-z0-9]{32,})|([0-9]{1,}\/[0-9]{10,}:[A-Za-z0-9]{32,})
@@ -304,8 +314,11 @@
 - Line:
   - Token Variable: (?i)line_(channel|secret|token)
 
+- Crunchbase:
+  - API Key Header Variable: (?i)X-Cb-User-Key
+
 - RapidAPI:
-  - Key Variable: (?i)x-rapidapi-key
+  - Key Header Variable: (?i)x-rapidapi-key
 
 - WeChat:
   - App Key: (?:^|['\"`])(wx[a-f0-9]{16})(?:$|['\"`])
@@ -342,6 +355,7 @@
   - API Key Variable: (?i)_api_key
   - API Key Header Variable: X-Api-Key
   - Secret Key Variable: (?i)secret_key
+  - User Key Variable: (?i)user_key
   - Secret Variable: (?i)secret
   - Consumer Key Variable: (?i)consumer(\.|_)?key
   - Consumer Secret Variable: (?i)consumer(\.|_)?secret
