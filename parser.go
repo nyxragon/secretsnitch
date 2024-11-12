@@ -16,12 +16,37 @@ import (
 )
 
 var (
-	blacklistFile = "blacklist.yaml"
+	namesBlacklistFile  = "blacklist/names.yaml"
+	valuesBlacklistFile = "blacklist/values.yaml"
 )
 
-func containsBlacklisted(text string) bool {
+func containsBlacklistedNames(text string) bool {
 
-	data, err := os.ReadFile(blacklistFile)
+	data, err := os.ReadFile(namesBlacklistFile)
+	if err != nil {
+		log.Fatalf("Error: %v", err)
+	}
+
+	var blacklist []string
+	err = yaml.Unmarshal(data, &blacklist)
+	if err != nil {
+		log.Fatalf("Error: %v", err)
+	}
+
+	for _, item := range blacklist {
+		re := regexp.MustCompile(item)
+		if len(re.FindAllString(text, 1)) > 0 {
+			return true
+		}
+	}
+
+	return false
+
+}
+
+func containsBlacklistedValues(text string) bool {
+
+	data, err := os.ReadFile(valuesBlacklistFile)
 	if err != nil {
 		log.Fatalf("Error: %v", err)
 	}
@@ -320,8 +345,7 @@ func extractURLs(text string) []string {
 		baseUrl += "/"
 	}
 
-	rx := xurls.Relaxed()
-	rxUrls := rx.FindAllString(text, -1)
+	rxUrls := xurls.Relaxed.FindAllString(text, -1)
 	captured = append(captured, rxUrls...)
 
 	var splitText []string

@@ -14,6 +14,7 @@ require (
 	github.com/tdewolff/minify v2.3.6+incompatible
 	golang.org/x/exp v0.0.0-20241108190413-2d47ceb2692f
 	gopkg.in/yaml.v3 v3.0.1
+	mvdan.cc/xurls v1.1.0
 	mvdan.cc/xurls/v2 v2.5.0
 )
 

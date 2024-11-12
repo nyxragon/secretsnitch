@@ -172,6 +172,9 @@
 - SonarSource:
   - API Key Variable: sonar(qube|source)_(api_key|token|key)
 
+- Kakao:
+  - API Key Variable: (?i)KAKAO(_|-){0,1}API(_|-){0,1}KEY
+
 - Airtable:
   - API Key: (?i)(?:airtable).{0,40}[\"\'`]?\s{0,50}(?::|=>|=|,)\s{0,50}[\"\'`]?(key[a-zA-Z0-9_-]{14})
   - Table URL: https:\/\/api\.airtable\.com\/v0\/[\w]+\/[\w]+

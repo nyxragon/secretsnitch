@@ -1,0 +1,23 @@
+# Some notes: 
+# do not add fringe regexes like "_0x1be7a8(0xe8e)})[_0x1be7a8(0x3cf)" to blacklist. It may contain strings on CSR pages.
+
+- (?i)data
+- (?i)image
+- (?i)sha[0-9]{0,3}-
+- db.String
+- htmlFor
+- label
+- sys\.argv\[\d\]
+- (?i)FORGOT_PASSWORD
+- (?i)RESET_PASSWORD
+- React.
+- input
+- (?i)Enter
+- useState\(''\)
+- \]\(\)\}
+- catchAsync\(async
+- z.object\(
+- button
+- (?i)login.Password
+- document.getElementById
+- (?i)checksum

@@ -72,7 +72,8 @@ func FindSecrets(text string) ToolData {
 			data, _ := extractKeyValuePairs(strings.Replace(line, sourceUrl, "", 1))
 
 			for _, variable := range data {
-				if containsBlacklisted(variable.Value) || containsBlacklisted(variable.Name) {
+
+				if containsBlacklistedNames(variable.Name) || containsBlacklistedValues(variable.Value) {
 					continue
 				}
 
@@ -250,7 +251,7 @@ func scanFile(filePath string, wg *sync.WaitGroup) {
 
 	if *maxRecursions > 0 {
 		recursionCount++
-		urls := grabURLs(string(data))
+		urls := extractURLs(string(data))
 		successfulUrls := fetchFromUrlList(urls, true)
 
 		if recursionCount <= *maxRecursions {
