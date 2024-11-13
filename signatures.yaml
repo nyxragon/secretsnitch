@@ -202,6 +202,13 @@
   - User API Key: (?i)sk-[^proj]\w.+T3BlbkFJ[\w-]+
   - API Key Variable: (?i)openai(.|_)api_key
 
+- Groq:
+  - API Key: (?i)gsk_[A-Za-z0-9]+
+  - API Key Variable: (?i)GROQ(_|-){0,1}API(_|-){0,1}KEY
+
+- Pinecone:
+  - API Key Variable: (?i)PINECONE(_|-){0,1}API(_|-){0,1}KEY
+
 - OpenWeatherMap:
   - API Key: (?i)(?:https?://api\.openweathermap\.org/data/[a-z0-9.+?\/]+=)([a-z0-9]{32})
 
