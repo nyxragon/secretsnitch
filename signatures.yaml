@@ -208,6 +208,15 @@
 - Pinecone:
   - API Key Variable: (?i)PINECONE(_|-){0,1}API(_|-){0,1}KEY
 
+- LangChain:
+  - API Key Variable: (?i)LANGCHAIN(_|-){0,1}API(_|-){0,1}KEY
+
+- ElevenLabs:
+  - API Key Variable: (?i)ELEVENLABS(_|-){0,1}API(_|-){0,1}KEY
+
+- CartesiaAI:
+  - API Key Variable: (?i)CARTESIA(_|-){0,1}API(_|-){0,1}KEY
+
 - OpenWeatherMap:
   - API Key URL: (?i)(?:https?://api\.openweathermap\.org/data/[a-z0-9.+?\/]+=)([a-z0-9]{32})
 
@@ -284,7 +293,7 @@
 
 - Asana:
   - Personal Access Token: (?i)(?:asana).{0,40}([0-9]{1,}\/[0-9]{10,}:[A-Za-z0-9]{32,})|([0-9]{1,}\/[0-9]{10,}:[A-Za-z0-9]{32,})
-
+  
 - Beamer:
   - API Key: (?i)(?:beamer).{0,40}b_[a-z0-9+/]{43}=|b_[a-z0-9+/]{43}=
 
