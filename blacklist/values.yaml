@@ -31,7 +31,7 @@
 - (?i)PasswordUtils\.HashPassword\(newPassword\)
 - SetOrKeep::Set\(TokenSymbol\(
 - '[0-9]+\.[0-9]+\.[0-9]+'
-- (?i)newUser.UserPassword"
+- (?i)newUser.UserPassword
 - (?i)ctx.startAttribute\(token.value\)\)
 - (?i)ctx.addBoolean\(token.value\)\)
 - (?i)ctx.startRule\(token.value\)\)
@@ -41,4 +41,4 @@
 - (?i)urielAccessKey
 - (?i)urielRefreshKey
 - (?i)^.*\.png$
-
+- (?i)self.producer_key_password
