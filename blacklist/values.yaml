@@ -28,3 +28,6 @@
 - \(\'\'\)
 - (?i)your-.*-(token|key|password)
 - (?i)os.getenv
+- (?i)PasswordUtils\.HashPassword\(newPassword\)
+- SetOrKeep::Set\(TokenSymbol\(
+
