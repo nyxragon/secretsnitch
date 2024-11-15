@@ -30,4 +30,15 @@
 - (?i)os.getenv
 - (?i)PasswordUtils\.HashPassword\(newPassword\)
 - SetOrKeep::Set\(TokenSymbol\(
+- '[0-9]+\.[0-9]+\.[0-9]+'
+- (?i)newUser.UserPassword"
+- (?i)ctx.startAttribute\(token.value\)\)
+- (?i)ctx.addBoolean\(token.value\)\)
+- (?i)ctx.startRule\(token.value\)\)
+- (?i)PasswordUtils.HashPassword\(newPassword\)
+- (?i)PasswordUtils.HashPassword\(oldPassword\)
+- (?i)auth.get[_-]{0,1}tokens\(user\)
+- (?i)urielAccessKey
+- (?i)urielRefreshKey
+- (?i)^.*\.png$
 
