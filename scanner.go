@@ -85,7 +85,7 @@ func FindSecrets(text string) ToolData {
 						var tags []string
 						match := variableValueMatch
 
-						if strings.Contains(strings.ToLower(service), "block") {
+						if strings.Contains(strings.ToLower(service), "block") || strings.Contains(strings.ToLower(service), "url") {
 							match = regex.FindAllString(text, -1)
 							if len(match) > 0 {
 								variable.Name = strings.Split(match[0], "\n")[0]

@@ -26,3 +26,5 @@
 - \(\)
 - \(\'\'\)
 - \(\'\'\)
+- (?i)your-.*-(token|key|password)
+- (?i)os.getenv

@@ -319,7 +319,7 @@ This file contains a list of regular expressions that the tool uses to catch sec
 
   - Secret patterns: these are patterns that are commonly used by secrets, for example, `AIza...` for GCP keys, `AKIA` for AWS keys and so on.
 
-  - Block patterns: these are patterns that commonly exist in large blocks of text, for example, private key files.
+  - Block and URL patterns: these are patterns that commonly exist in large blocks of text, for example, private key files or MySQL URL with authentication credentials.
 
 - `blacklist.yaml`
 This file contains a list of blacklist patterns that are skipped. These include things like blob data patterns for images and audio, certain placeholderstrings etc.

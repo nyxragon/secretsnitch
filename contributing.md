@@ -23,8 +23,8 @@ There are two types of signatures
 - Variable name patterns: these are denoted by the use of the word "Variable" in their key. These are for variable names in code, where the secret may not have a recognizable pattern, but the name of the variable generally follows a pattern.
 For example, passwords are random, but their field tends to be named "password" in most instances. Therefore, this is a Generic password variable pattern.
 
-- Block patterns: these are denoted by the use of the word "Block" in their key. They contain patterns that commonly exist in large blocks of text, for example, private key files.
-For example, `-----BEGIN OPENSSH PRIVATE KEY-----`.
+- Block patterns and URLs: these are denoted by the use of the word "Block" and "URL" in their keys respectively. They contain patterns that commonly exist in large blocks of text, for example, private key files.
+For example, `-----BEGIN OPENSSH PRIVATE KEY-----`, or `mysql://admin:password@asdf.com/`.
 
 - Secret patterns: these are patterns that are commonly used by secrets. Their keys don't consist of reserved words like the ones above. The more unique the regular expressions are, the fewer false positives they result in.
 For example, `AIza...` for GCP keys, `AKIA` for AWS keys and so on.

@@ -3,12 +3,12 @@
   - Access Key: (?:A3T[A-Z0-9]|AKIA|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA|ABIA|ACCA)[A-Z0-9]{16}
   - Secret Access Key Variable: (?i)(amazon|amz|aws)[-_]{0,1}(secret)[-_]{0,1}((access)[-_]{0,1}){0,1}key
   # - Cognito User Pool ID: (?i)us-[a-z]{2,}-[a-z]{4,}-\d{1,}
-  - RDS Password: (?i)(rds\-master\-password|db\-password)[^\"'`\n]{0,40}[\"'`\n]{0,3}[a-zA-Z0-9@#*+=]{8,}
+  - RDS Password: (?i)(rds\-master\-password|db\-password)
   - S3 Private Key Variable: (?i)AWS_S3_PRIVATE_KEY|s3_key|S3_PRIVATE_KEY
   - Security Token Header Variable: (?i)X-Amz-Security-Token
   - API Gateway Key Source Header Variable: (?i)x-amazon-apigateway-api-key-source
   - S3 Bucket: (?i)AWS_S3_BUCKET|s3_bucket
-  - SNS Confirmation Token: (?i)SubscribeURL":"https:\/\/sns\.[a-z0-9-]+\.amazonaws\.com\/?Action=ConfirmSubscription&Token=[a-zA-Z0-9-=_]+
+  - SNS Confirmation URL: (?i)https:\/\/sns\.[a-z0-9-]+\.amazonaws\.com\/?Action=ConfirmSubscription&Token=[a-zA-Z0-9-=_]+
   - SES SMTP Password Variable: (?i)ses_smtp_password
   - AWS Private Key Variable: (?i)ec2\-private\-key|EC2_PRIVATE_KEY
   - MWS Token: (amzn\.mws\.[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})
@@ -19,12 +19,11 @@
   - Azure Functions Key Header Variable: (?i)x-functions-key
   # - Azure account key
   # - Azure account name
-  - Azure Connection String: (?i)(.*.windows.net).+(password["':= ]{0,5}["':= ]{0,5}.{5,})
+  - Azure Connection String: (?i)(.*.windows.net).+(password)
   - Azure Endpoint Key: (?i)(defaultendpointsprotocol).+(key).+
   - Client Secret: (?i)(?:client_secret|ClientSecret)[\s:\"]{0,3}[a-zA-Z0-9\-_]{36,}
   - Graph API Key: (?i)MSGRAPH_[a-zA-Z0-9\-_]{20,40}
-  - Outlook Webhook URL Token: (?i)https:\/\/outlook\.office\.com\/webhook\/[A-Za-z0-9\-]{60,}
-  - Webhook URL Token: (?i)https:\/\/outlook\.office\.com\/webhook\/[A-Za-z0-9\-]{60,}
+  - Outlook Webhook URL: (?i)https:\/\/outlook\.office\.com\/webhook\/[A-Za-z0-9\-]{60,}
   - OneDrive Access Token Variable: (?i)onedrive_access_token
   - SQL Connection Password Variable: mssql.connection.password
 
@@ -46,7 +45,7 @@
   - Access Token: \b(?i)55[0-9a-fA-F]{32}\b
 
 - Atlassian: 
-  - JIRA Token: (?i)(?:jira)[^{}()<>?*&:%@!\/= \n]{0,20}[\"\'`]?\s{0,50}\b(?::|=>|=|,)\s{0,50}[\"\'`]?([a-zA-Z-0-9]{24})
+  - JIRA Token: (?i)(jira_token)
   - Bitbucket Data Center Access Token: BBDC-[a-zA-Z0-9+]{44}
   - Confluence API Key: (?i)confluence[a-zA-Z0-9_]{12,}
   - App Password: (?i)(bbp_[a-zA-Z0-9]{32})
@@ -73,7 +72,7 @@
   - Device Code: \bGH_[a-zA-Z0-9_]{9,30}
   - Refresh Token: (\b?i)ghr_[A-Za-z0-9_]{35,38}
   - Webhook Secret: (?i)whsec_[A-Za-z0-9]{31,38}
-  - Authentication URL: "[a-zA-Z0-9_-]*:[a-zA-Z0-9_\\-]+@github\\.com*"
+  - Authentication URL: (?i)(?:(http|https):)//[\S]{1,256}:[\S]{1,256}@github.com[\S]+
 
 - GitLab:
   - Personal Access Token: (?i)glpat-[A-Za-z0-9\-_]{20}
@@ -136,7 +135,7 @@
 
 - Grafana:
   - Service Account Token: (?i)glsa_[a-z0-9+-=\/]{32}_[a-f0-9]{8}
-  - API Token: (?:(?i)grafana[a-z0-9_-]{0,32})( ){0,1}(:|=)( ){0,1}("){0,1}eyJrIjoi[A-Za-z0-9_]{42}("){0,1}
+  - API Token: (?i)grafana_(api_token|token)
 
 - Stripe:
   - Read-only Key: (?i)rk_live_[a-zA-Z0-9]{20,30}
@@ -210,7 +209,7 @@
   - API Key Variable: (?i)PINECONE(_|-){0,1}API(_|-){0,1}KEY
 
 - OpenWeatherMap:
-  - API Key: (?i)(?:https?://api\.openweathermap\.org/data/[a-z0-9.+?\/]+=)([a-z0-9]{32})
+  - API Key URL: (?i)(?:https?://api\.openweathermap\.org/data/[a-z0-9.+?\/]+=)([a-z0-9]{32})
 
 - Razorpay:
   - Test Key: (?i)rzp_test_\w{10,20}
@@ -224,7 +223,7 @@
   - Domain Sending Key: "[a-f0-9]{32}-[a-f0-9]{8}-[a-f0-9]{8}"
 
 - Okta:
-  - API Key: (?i)(?:okta).{0,40}[\"\'`]?\s{0,50}(?::|=>|=|,)\s{0,50}[\"\'`]?00[a-zA-Z0-9_-]{40}
+  - API Key Variable: (?i)(?:okta_api_key)
 
 - Hashicorp:
   - Terraform API Token: (?i)([A-Za-z0-9]{14}.atlasv1.[A-Za-z0-9]{67})
@@ -297,23 +296,23 @@
 
 - Saucelabs:
   - TestFairy Key Variable: (?i)testfairy_{0,}(access_key|key|secret|token|shared_secret|sharedsecret)
-  - TestFairy OAuth Token: https://testfairy\.atlassian\.net/plugins/servlet/oauth/authorize\?oauth_token-\w{32}
+  - TestFairy OAuth Token URL: https://testfairy\.atlassian\.net/plugins/servlet/oauth/authorize\?oauth_token-\w{32}
   - Key Variable: (?i)sauce_token
 
 - Hockeyapp:
-  - Key: (?i)(?:hockey).{0,40}[\"\'`]?\s{0,50}(?::|=>|=|,)\s{0,50}[\"\'`]?([0-9a-f]{32})
+  - Key Variable: (?i)(?:hockeyapp_key)
 
 - NuGet:
   - API Key: (?i)(?:nuget).{0,40}(oy2[a-z0-9]{43})
 
 - Cloudinary:
-  - API Environment Variable: cloudinary://.+/
+  - API URL: cloudinary://.+/
  
 - CodeClimate:
-  - Key: (?i)(?:codeclimate).{0,40}[\"\'`]?\s{0,50}(?::|=>|=|,)\s{0,50}[\"\'`]?([0-9a-f]{64})
+  - Key Variable: (?i)(?:codeclimate_key)
 
 - Pingdom:
-  - Token: (?i)(?:pingdom).{0,40}[\"\'`]?\s{0,50}(?::|=>|=|,)\s{0,50}[\"\'`]?([a-zA-Z-0-9-_]{60,80})
+  - Token Variable: (?i)(?:pingdom_token)
 
 - Ngrok:
   - Auth Token Variable: (?i)ngrok.set_auth_token
@@ -366,7 +365,7 @@
   - API Key Header Variable: X-Api-Key
   - Secret Key Variable: (?i)secret_key
   - User Key Variable: (?i)user_key
-  - Secret Variable: (?i)secret
+  - Secret Variable: (?i).+secret\b
   - Consumer Key Variable: (?i)consumer(\.|_)?key
   - Consumer Secret Variable: (?i)consumer(\.|_)?secret
   # URLs
